@@ -74,6 +74,7 @@ q-noise/
 ├── eslint.config.js
 ├── .gitignore
 └── README.md
+
 ---
 
 ## ⚙️ Tech Stack
