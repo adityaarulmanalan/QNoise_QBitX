@@ -135,6 +135,18 @@ The app will run at:
 http://localhost:5173/
 
 ---
+⚠️ Troubleshooting
+Check Node.js version
+
+Make sure Node.js version is 18 or higher:
+
+node -v
+Fix dependency issues
+rm -rf node_modules package-lock.json
+npm install
+npm run dev
+
+---
 
 ## 🎯 Use Cases
 
