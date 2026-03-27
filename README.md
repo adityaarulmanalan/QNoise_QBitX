@@ -27,21 +27,21 @@ QBitX bridges theory and practice by letting users **see, tweak, and fix noise i
 
 ## 🧠 Key Features
 
-- 📈 **Real-Time Signal Visualization**  
+- 📈 Real-Time Signal Visualization  
   Simulates quantum control signals (e.g., microwave pulses)
 
-- 🎛️ **Interactive Noise Injection**
+- 🎛️ Interactive Noise Injection  
   - Gaussian Noise  
   - Phase Noise  
   - Amplitude Noise  
 
-- 🧪 **Live Noise Simulation Engine**  
+- 🧪 Live Noise Simulation Engine  
   Observe how signals degrade dynamically
 
-- 🧩 **Mitigation Controls**  
+- 🧩 Mitigation Controls  
   Apply filtering and correction techniques to restore signal integrity
 
-- 🎯 **Educational + Debugging Tool**  
+- 🎯 Educational + Debugging Tool  
   Understand quantum noise without needing actual hardware
 
 ---
@@ -52,20 +52,20 @@ QBitX bridges theory and practice by letting users **see, tweak, and fix noise i
 ↓ ↑
 [Mitigation Controls] ← [User Input UI]
 
-
 ---
+
 ## 📁 File Structure
 
 q-noise/
 ├── public/
-│   ├── icons.svg
-│   ├── favicon.svg
+│ ├── icons.svg
+│ ├── favicon.svg
 │
 ├── src/
-│   ├── App.jsx
-│   ├── App.css
-│   ├── main.jsx
-│   └── index.css
+│ ├── App.jsx
+│ ├── App.css
+│ ├── main.jsx
+│ └── index.css
 │
 ├── index.html
 ├── package.json
@@ -79,12 +79,11 @@ q-noise/
 
 ## ⚙️ Tech Stack
 
-| Layer            | Technology              |
-|------------------|------------------------|
-| Frontend         | React + Tailwind CSS   |
-| Visualization    | Chart.js / Recharts / D3.js |
-| Backend (optional) | Flask / Node.js       |
-| Simulation Core  | JavaScript DSP Logic   |
+| Layer           | Technology                     |
+|-----------------|-------------------------------|
+| Frontend        | React + CSS                   |
+| Visualization   | Chart.js                      |
+| Simulation Core | JavaScript DSP Logic          |
 
 ---
 
@@ -118,71 +117,60 @@ Leads to incorrect energy levels
 
 ### 1. Clone the repository
 
-- bash
 git clone https://github.com/adityaarulmanalan/QNoise_QBitX.git
 cd QNoise_QBitX
 
-## Install dependencies
+### 2. Install dependencies
 npm install
 
-## Start Development Server
+### 3. Start development server
 npm run dev
 
-## Open in browser
-
-The app will run at:
-
+### 4. Open in browser
 http://localhost:5173/
 
----
 ⚠️ Troubleshooting
-Check Node.js version
+### Check Node.js version
+node -v 
+Make sure it is 18 or higher.
 
-Make sure Node.js version is 18 or higher:
-
-node -v
-Fix dependency issues
+### Fix dependency issues
 rm -rf node_modules package-lock.json
 npm install
 npm run dev
 
 ---
 
-## 🎯 Use Cases
-
-- 🧑‍🔬 Quantum research simulation  
-- 🎓 Educational demonstrations  
-- 🛠️ Signal debugging sandbox  
-- 💡 Hackathon prototyping  
-
----
-
-## 💡 Future Improvements
-
-- ⚡ Real hardware integration (oscilloscope-style input)
-- 🧠 AI-based noise correction
-- 🔬 Quantum circuit simulation layer
-- 🌐 Cloud-based collaborative testing
+**🎯 Use Cases**
+🧑‍🔬 Quantum research simulation
+🎓 Educational demonstrations
+🛠️ Signal debugging sandbox
+💡 Hackathon prototyping
 
 ---
 
-## 👥 Team QBitX
-
-- Aditya Arul Manalan  
-- Naman Kaushik  
-- Tulsi  
-- Avni Sharma  
-
----
-
-## 🏆 Hackathon
-
-Built for **QtHack04 @ SRM Institute of Science and Technology**
+**💡 Future Improvements**
+⚡ Real hardware integration
+🧠 AI-based noise correction
+🔬 Quantum circuit simulation layer
+🌐 Cloud-based collaborative testing
 
 ---
 
-## 📜 License
+**👥 Team QBitX**
+Aditya Arul Manalan
+Naman Kaushik
+Tulsi
+Avni Sharma
+
+---
+
+🏆 Hackathon
+
+Built for QtHack04 @ SRM Institute of Science and Technology
+
+---
+
+📜 License
 
 This project is open-source and available under the MIT License.
-
----
