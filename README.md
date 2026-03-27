@@ -142,26 +142,26 @@ npm run dev
 ---
 
 **🎯 Use Cases**
-🧑‍🔬 Quantum research simulation
-🎓 Educational demonstrations
-🛠️ Signal debugging sandbox
-💡 Hackathon prototyping
+- 🧑‍🔬 Quantum research simulation
+- 🎓 Educational demonstrations
+- 🛠️ Signal debugging sandbox
+- 💡 Hackathon prototyping
 
 ---
 
 **💡 Future Improvements**
-⚡ Real hardware integration
-🧠 AI-based noise correction
-🔬 Quantum circuit simulation layer
-🌐 Cloud-based collaborative testing
+- ⚡ Real hardware integration
+- 🧠 AI-based noise correction
+- 🔬 Quantum circuit simulation layer
+- 🌐 Cloud-based collaborative testing
 
 ---
 
 **👥 Team QBitX**
-Aditya Arul Manalan
-Naman Kaushik
-Tulsi
-Avni Sharma
+- Aditya Arul Manalan
+- Naman Kaushik
+- Tulsi
+- Avni Sharma
 
 ---
 
