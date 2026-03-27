@@ -56,24 +56,19 @@ QBitX bridges theory and practice by letting users **see, tweak, and fix noise i
 
 ## 📁 File Structure
 
-q-noise/
-├── public/
-│   ├── icons.svg
-│   └── favicon.svg
-│
-├── src/
-│   ├── App.jsx
-│   ├── App.css
-│   ├── main.jsx
-│   └── index.css
-│
-├── index.html
-├── package.json
-├── package-lock.json
-├── vite.config.js
-├── eslint.config.js
-├── .gitignore
-└── README.md
+q-noise-react_final/
+- public/
+  - icons.svg
+  - favicon.svg
+- src/
+  - App.jsx
+  - App.css
+  - main.jsx
+  - index.css
+- index.html
+- package.json
+- package-lock.json
+- README.md
 
 ---
 
