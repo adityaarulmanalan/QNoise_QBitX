@@ -130,7 +130,3 @@ Built for **QtHack04 @ SRM Institute of Science and Technology**
 This project is open-source and available under the MIT License.
 
 ---
-
-## 🌌 Tagline
-
-> “Because in quantum computing, even silence has noise.”
