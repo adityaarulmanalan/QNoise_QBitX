@@ -1,115 +1,136 @@
-🌌 Q-Noise
-Quantum Signal Noise Visualizer
+# 🌌 QBitX — Q-Noise Quantum Analysis Platform
 
-Making the invisible chaos of quantum noise visible.
+### Visualizing, Simulating, and Mitigating Quantum Noise in Real-Time
 
-🚀 Overview
+QBitX is an advanced signal visualization and noise simulation platform built to tackle one of quantum computing’s biggest challenges — **decoherence**.
 
-Q-Noise is an interactive platform that simulates how noise affects quantum control signals in real time. It allows you to generate a clean signal, inject noise, observe its impact, apply mitigation techniques, and measure system performance — all in a single visual interface.
+Designed for developers, researchers, and students, Q-Noise provides a **real-time sandbox** to simulate how environmental noise affects quantum signals and explore mitigation strategies interactively.
 
-⚡ The Problem
+---
 
-Quantum systems are extremely sensitive.
-Even small disturbances like thermal noise or electromagnetic interference can:
+## 🚀 Overview
 
-distort signals
-reduce fidelity
-collapse coherence
+Quantum systems are extremely sensitive to disturbances like:
 
-These effects are difficult to observe directly.
+- 🌡️ Thermal noise  
+- 📡 Electromagnetic interference (EMI)  
+- 🔄 Phase distortions  
 
-💡 The Solution
+These lead to:
+- Incorrect qubit rotations  
+- Signal degradation  
+- Loss of quantum state fidelity  
 
-Q-Noise transforms this into a visual, interactive experience:
+QBitX bridges theory and practice by letting users **see, tweak, and fix noise in real time**.
 
-Clean Signal → Noise Injection → Visualization → Mitigation → Metrics
+---
 
-🎛️ Features
+## 🧠 Key Features
 
-**Real-Time Simulation**
-Clean sine wave generation
-Adjustable Gaussian noise
-Instant visual updates
+- 📈 **Real-Time Signal Visualization**  
+  Simulates quantum control signals (e.g., microwave pulses)
 
-**Visualization**
-Oscilloscope (clean vs noisy vs corrected signal)
-Bloch sphere (qubit state stability)
-Frequency spectrum (noise distribution)
+- 🎛️ **Interactive Noise Injection**
+  - Gaussian Noise  
+  - Phase Noise  
+  - Amplitude Noise  
 
-**Noise Mitigation**
-RLC filtering for high-frequency noise reduction
-Predictive smoothing based on signal trends
+- 🧪 **Live Noise Simulation Engine**  
+  Observe how signals degrade dynamically
 
-**Metrics**
-SNR (Signal-to-Noise Ratio)
-Fidelity
-T₂ relaxation time
-THD (Total Harmonic Distortion)
-Error rate
-Noise power
-Coherence
+- 🧩 **Mitigation Controls**  
+  Apply filtering and correction techniques to restore signal integrity
 
-**Export**
-Download simulation data as JSON
+- 🎯 **Educational + Debugging Tool**  
+  Understand quantum noise without needing actual hardware
 
-🧠 How It Works
+---
 
-A clean control signal is generated
-Noise is injected using a controllable model
-Mitigation techniques are applied
-Metrics update in real time
+## 🏗️ Architecture
 
-Everything happens instantly in the browser
+[Signal Generator] → [Noise Engine] → [Visualization Layer]
+↓ ↑
+[Mitigation Controls] ← [User Input UI]
 
-🛠️ Tech Stack
 
-React + Vite
-JavaScript (signal simulation)
-Canvas-based rendering
-Custom dark UI
+---
 
-🖥️ Running the Project
+## ⚙️ Tech Stack
 
-git clone https://github.com/adityarulmanalan/q-noise.git
+| Layer            | Technology              |
+|------------------|------------------------|
+| Frontend         | React + Tailwind CSS   |
+| Visualization    | Chart.js / Recharts / D3.js |
+| Backend (optional) | Flask / Node.js       |
+| Simulation Core  | JavaScript DSP Logic   |
 
-cd q-noise
-npm install
-npm run dev
+---
 
-📂 Project Structure
+## 🧪 Noise Models Explained
 
-src
-├── App.jsx
-├── App.css
-├── main.jsx
-├── index.css
+### 🌫️ Gaussian Noise
+Random fluctuations affecting signal values  
+Simulates thermal/environmental disturbances  
 
-public
-├── hero.png
-├── icons.svg
+### 🔄 Phase Noise
+Alters the timing/phase of the signal  
+Causes rotation errors in qubits  
 
-⚠️ Disclaimer
+### 📉 Amplitude Noise
+Changes signal strength  
+Leads to incorrect energy levels  
 
-**This is a simulation tool.**
+---
 
-It does not connect to real quantum hardware.
-It is intended for visualization, learning, and experimentation.
+## 🛠️ How It Works
 
-🚧 Future Scope
+1. Generate a clean signal  
+2. Apply selected noise types  
+3. Visualize distorted output  
+4. Adjust mitigation controls  
+5. Compare before vs after  
 
-Real hardware integration
-Advanced ML-based noise correction
-Multi-qubit simulation
-Custom noise models
-Cloud experiment storage
+---
 
-🧑‍💻 Team QBitX
+## 🎯 Use Cases
 
-Aditya Arul Manalan
-Naman Kaushik
-Tulsi 
-Avni Sharma
+- 🧑‍🔬 Quantum research simulation  
+- 🎓 Educational demonstrations  
+- 🛠️ Signal debugging sandbox  
+- 💡 Hackathon prototyping  
 
-⭐ Support
+---
 
-If you like this project, star the repo and share it.
+## 💡 Future Improvements
+
+- ⚡ Real hardware integration (oscilloscope-style input)
+- 🧠 AI-based noise correction
+- 🔬 Quantum circuit simulation layer
+- 🌐 Cloud-based collaborative testing
+
+---
+
+## 👥 Team QBitX
+
+- Aditya Arul Manalan  
+- Naman Kaushik  
+- Tulsi  
+- Avni Sharma  
+
+---
+
+## 🏆 Hackathon
+
+Built for **QtHack04 @ SRM Institute of Science and Technology**
+
+---
+
+## 📜 License
+
+This project is open-source and available under the MIT License.
+
+---
+
+## 🌌 Tagline
+
+> “Because in quantum computing, even silence has noise.”
