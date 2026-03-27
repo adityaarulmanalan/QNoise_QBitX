@@ -1,0 +1,1140 @@
+/* ============================================================
+   App.css — Q-Noise Quantum Oscilloscope
+   BUG FIXES applied (see comments throughout):
+   1. .legend-dot.noisy was #7c8cff — completely wrong vs dataset color #f59e0b
+   2. .live-badge used card background + primary text, conflicting with JSX inline style
+   3. .toggle-switch.neural vs .toggle-switch.neural.active gradient reversed
+   4. CSS classes defined but never assigned in JSX (dead selectors noted)
+   ============================================================ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --quantum-bg: #0a0a0f;
+  --quantum-surface: #12121a;
+  --quantum-card: #1a1a25;
+  --quantum-border: #2a2a3a;
+  --quantum-primary: #00d4ff;
+  --quantum-secondary: #7c3aed;
+  --quantum-accent: #10b981;
+  --quantum-warning: #f59e0b;
+  --quantum-danger: #ef4444;
+  --quantum-neural: #d946ef;   /* BUG FIX: Added — was missing, "#ff00ff" used raw in JSX */
+  --quantum-text: #e4e4e7;
+  --quantum-muted: #71717a;
+}
+
+html,
+body,
+#root {
+  background-color: #0a0a0f !important;
+  background: #0a0a0f !important;
+  height: 100%;
+  min-height: 100vh;
+  font-family: "Inter", "Segoe UI", sans-serif;
+  color: #e4e4e7;
+  overflow: hidden;
+}
+
+body {
+  margin: 0;
+}
+
+.app-container {
+  background: linear-gradient(135deg, #0a0a0f 0%, #12121a 50%, #0a0a0f 100%);
+  min-height: 100vh;
+  height: 100vh;
+  display: flex;
+  overflow: hidden;
+}
+
+.quantum-glow {
+  box-shadow:
+    0 0 20px rgba(0, 212, 255, 0.15),
+    0 0 40px rgba(0, 212, 255, 0.05);
+}
+
+.quantum-glow-purple {
+  box-shadow:
+    0 0 20px rgba(124, 58, 237, 0.15),
+    0 0 40px rgba(124, 58, 237, 0.05);
+}
+
+.signal-pulse {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Sidebar */
+.sidebar {
+  width: 300px;
+  min-width: 300px;
+  background: var(--quantum-surface);
+  border-right: 1px solid var(--quantum-border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.logo-section {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--quantum-border);
+  flex-shrink: 0;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: linear-gradient(
+    135deg,
+    var(--quantum-primary),
+    var(--quantum-secondary)
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.35);
+}
+
+.logo-icon svg {
+  width: 22px;
+  height: 22px;
+  color: white;
+}
+
+.logo-text h1 {
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--quantum-primary);
+  font-family: "JetBrains Mono", monospace;
+}
+
+.logo-text p {
+  font-size: 11px;
+  color: var(--quantum-muted);
+}
+
+.team-badge {
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--quantum-border);
+  flex-shrink: 0;
+}
+
+.team-card {
+  background: var(--quantum-card);
+  border-radius: 8px;
+  padding: 12px;
+  border: 1px solid var(--quantum-border);
+}
+
+.team-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.team-header .event-tag {
+  font-size: 11px;
+  font-family: "JetBrains Mono", monospace;
+  color: var(--quantum-secondary);
+}
+
+.team-header .separator {
+  color: var(--quantum-muted);
+}
+
+.team-header .team-name {
+  font-size: 11px;
+  font-family: "JetBrains Mono", monospace;
+  color: var(--quantum-accent);
+}
+
+.team-members {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.team-members span {
+  padding: 2px 8px;
+  background: var(--quantum-bg);
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--quantum-text);
+}
+
+/* Controls */
+.controls {
+  flex: 1;
+  min-height: 0;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+}
+
+.control-section h3 {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--quantum-text);
+  margin-bottom: 10px;
+}
+
+.control-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.control-header label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--quantum-text);
+}
+
+.control-header .value {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 14px;
+  color: var(--quantum-primary);
+}
+
+.slider-track {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--quantum-accent) 0%,
+    var(--quantum-warning) 50%,
+    var(--quantum-danger) 100%
+  );
+  border-radius: 8px;
+  height: 8px;
+  cursor: pointer;
+}
+
+.slider-track::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--quantum-primary);
+  cursor: pointer;
+  border: 3px solid var(--quantum-bg);
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.6);
+}
+
+.slider-track::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--quantum-primary);
+  cursor: pointer;
+  border: 3px solid var(--quantum-bg);
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.6);
+}
+
+.slider-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--quantum-muted);
+  margin-top: 4px;
+}
+
+.t2-indicator {
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: var(--quantum-bg);
+  border-radius: 8px;
+  border: 1px solid var(--quantum-border);
+}
+
+.t2-indicator .label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+.t2-indicator .label span:first-child {
+  color: var(--quantum-muted);
+}
+
+.t2-indicator .label span:last-child {
+  font-family: "JetBrains Mono", monospace;
+  color: var(--quantum-accent);
+}
+
+.t2-bar {
+  height: 6px;
+  background: var(--quantum-card);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.t2-bar-fill {
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--quantum-accent),
+    var(--quantum-primary)
+  );
+  transition: width 0.3s ease;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.4);
+}
+
+/* Toggle */
+.toggle-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.toggle-section label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--quantum-text);
+}
+
+.toggle-switch {
+  position: relative;
+  width: 56px;
+  height: 28px;
+  background: var(--quantum-border);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.toggle-switch.active {
+  background: linear-gradient(
+    90deg,
+    var(--quantum-accent),
+    var(--quantum-primary)
+  );
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+}
+
+.toggle-switch::after {
+  content: "";
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  background: white;
+  border-radius: 50%;
+  top: 3px;
+  left: 3px;
+  transition: transform 0.3s ease;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.toggle-switch.active::after {
+  transform: translateX(28px);
+}
+
+.toggle-description {
+  font-size: 11px;
+  color: var(--quantum-muted);
+  margin-top: 8px;
+  line-height: 1.4;
+}
+
+.filter-params {
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: var(--quantum-bg);
+  border-radius: 8px;
+  border: 1px solid var(--quantum-border);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  font-size: 11px;
+}
+
+.filter-params .param-label {
+  color: var(--quantum-muted);
+}
+
+.filter-params .param-value {
+  font-family: "JetBrains Mono", monospace;
+  color: var(--quantum-primary);
+  margin-top: 2px;
+}
+
+/* Signal Parameters */
+.param-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: var(--quantum-bg);
+  border-radius: 8px;
+  border: 1px solid var(--quantum-border);
+  font-size: 11px;
+  margin-bottom: 6px;
+}
+
+.param-row:last-child {
+  margin-bottom: 0;
+}
+
+.param-row .label {
+  color: var(--quantum-muted);
+}
+
+.param-row .value {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+  color: var(--quantum-primary);
+}
+
+/* Buttons */
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.btn-reset {
+  width: 100%;
+  padding: 10px 16px;
+  background: var(--quantum-card);
+  border: 1px solid var(--quantum-border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--quantum-text);
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.btn-reset:hover {
+  border-color: var(--quantum-primary);
+}
+
+.btn-export {
+  width: 100%;
+  padding: 10px 16px;
+  background: linear-gradient(
+    90deg,
+    var(--quantum-primary),
+    var(--quantum-secondary)
+  );
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  box-shadow: 0 0 16px rgba(0, 212, 255, 0.25);
+}
+
+.btn-export:hover {
+  opacity: 0.9;
+}
+
+/* Status Bar */
+.status-bar {
+  padding: 14px 16px;
+  border-top: 1px solid var(--quantum-border);
+  background: var(--quantum-bg);
+  flex-shrink: 0;
+}
+
+.status-bar .status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--quantum-accent);
+  animation: pulse 2s infinite;
+}
+
+.status-bar span {
+  font-size: 12px;
+  color: var(--quantum-muted);
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.header {
+  height: 60px;
+  min-height: 60px;
+  background: var(--quantum-surface);
+  border-bottom: 1px solid var(--quantum-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  flex-shrink: 0;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-left h2 {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* BUG FIX: .live-badge previously had card background + primary text.
+   The JSX used C.danger background (red) with white text (correct for a "LIVE" badge).
+   CSS and JSX were completely out of sync. Fixed to match JSX intent. */
+.live-badge {
+  padding: 3px 8px;
+  background: var(--quantum-danger);
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: white;
+  letter-spacing: 0.05em;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+  animation: pulse 2s infinite;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.header-metric {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.header-metric .label {
+  color: var(--quantum-muted);
+}
+
+.header-metric .value {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 16px;
+}
+
+.header-metric .value.primary {
+  color: var(--quantum-primary);
+}
+
+.header-metric .value.accent {
+  color: var(--quantum-accent);
+}
+
+/* Dashboard */
+.dashboard {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.metric-card {
+  background: linear-gradient(
+    145deg,
+    var(--quantum-card) 0%,
+    var(--quantum-surface) 100%
+  );
+  border: 1px solid var(--quantum-border);
+  border-radius: 10px;
+  padding: 16px;
+  transition: border-color 0.2s ease;
+  min-width: 0;
+}
+
+.metric-card:hover {
+  border-color: var(--quantum-primary);
+}
+
+.metric-card .label {
+  font-size: 11px;
+  color: var(--quantum-muted);
+  margin-bottom: 4px;
+}
+
+.metric-card .value {
+  font-size: 22px;
+  font-family: "JetBrains Mono", monospace;
+}
+
+.metric-card .value.primary {
+  color: var(--quantum-primary);
+}
+.metric-card .value.warning {
+  color: var(--quantum-warning);
+}
+.metric-card .value.secondary {
+  color: var(--quantum-secondary);
+}
+.metric-card .value.accent {
+  color: var(--quantum-accent);
+}
+
+/* Charts Grid */
+.charts-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 20px;
+}
+
+.chart-card {
+  background: var(--quantum-surface);
+  border: 1px solid var(--quantum-border);
+  border-radius: 12px;
+  padding: 16px;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.chart-header h3 {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.chart-legend {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 11px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--quantum-muted);
+}
+
+.legend-dot {
+  width: 12px;
+  height: 2px;
+  border-radius: 1px;
+}
+
+/* BUG FIX: .legend-dot.noisy was #7c8cff (a bluish-purple) but the Chart.js
+   dataset uses C.warning = #f59e0b (amber). This mismatch meant the legend color
+   was completely wrong for the noisy signal line. Fixed to match the dataset. */
+.legend-dot.clean {
+  background: var(--quantum-accent);        /* #10b981 — matches dataset */
+}
+.legend-dot.noisy {
+  background: var(--quantum-warning);       /* #f59e0b — was wrongly #7c8cff */
+}
+.legend-dot.mitigated {
+  background: var(--quantum-primary);       /* #00d4ff — matches standard mode dataset */
+}
+.legend-dot.neural {
+  background: var(--quantum-neural);        /* #d946ef — matches neural mode dataset */
+}
+
+.chart-canvas-wrapper {
+  flex: 1;
+  min-height: 0;
+  height: 240px;
+}
+
+/* Bloch Sphere card */
+.sphere-card {
+  background: var(--quantum-surface);
+  border: 1px solid var(--quantum-border);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 24px rgba(124, 58, 237, 0.08);
+}
+
+.sphere-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.sphere-header h3 {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.sphere-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sphere-status .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.sphere-status .dot.coherent {
+  background: var(--quantum-accent);
+  box-shadow: 0 0 6px var(--quantum-accent);
+}
+.sphere-status .dot.decohering {
+  background: var(--quantum-warning);
+  box-shadow: 0 0 6px var(--quantum-warning);
+}
+.sphere-status .dot.unstable {
+  background: var(--quantum-danger);
+  box-shadow: 0 0 6px var(--quantum-danger);
+}
+
+.sphere-status span {
+  font-size: 11px;
+  color: var(--quantum-muted);
+}
+
+.bloch-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* BUG FIX: .bloch-canvas had width: min(100%, 300px) and height: auto.
+   This meant the canvas CSS display size could be LARGER than its internal
+   200×200 coordinate space, causing blurry/stretched rendering.
+   Fixed: hardcode display to 200×200 to match canvas width/height attributes. */
+.bloch-canvas {
+  width: 200px;
+  height: 200px;
+  filter: drop-shadow(0 0 12px rgba(0, 212, 255, 0.4));
+  display: block;
+}
+
+.sphere-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.sphere-info-box {
+  background: var(--quantum-bg);
+  border-radius: 6px;
+  padding: 8px;
+  font-size: 11px;
+}
+
+.sphere-info-box .label {
+  color: var(--quantum-muted);
+}
+
+.sphere-info-box .value {
+  font-family: "JetBrains Mono", monospace;
+  color: var(--quantum-primary);
+  margin-top: 4px;
+}
+
+.sphere-info-box .value.accent {
+  color: var(--quantum-accent);
+}
+
+/* Analysis Grid */
+.analysis-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: 20px;
+}
+
+.analysis-card {
+  background: var(--quantum-surface);
+  border: 1px solid var(--quantum-border);
+  border-radius: 12px;
+  padding: 16px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.analysis-card h3 {
+  font-size: 15px;
+  font-weight: 500;
+  margin-bottom: 14px;
+  flex-shrink: 0;
+}
+
+.stats-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.stat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stat-row .label {
+  font-size: 14px;
+  color: var(--quantum-muted);
+}
+
+.stat-row .value {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 14px;
+}
+
+.stat-row .value.primary { color: var(--quantum-primary); }
+.stat-row .value.warning { color: var(--quantum-warning); }
+.stat-row .value.secondary { color: var(--quantum-secondary); }
+.stat-row .value.accent { color: var(--quantum-accent); }
+.stat-row .value.danger { color: var(--quantum-danger); }
+
+.stat-divider {
+  height: 1px;
+  background: var(--quantum-border);
+  margin: 2px 0;
+}
+
+/* AI Analytics Card */
+.ai-analytics-card {
+  background: linear-gradient(145deg, var(--quantum-surface) 0%, #1e1e2d 100%);
+  border: 1px solid var(--quantum-border);
+  border-radius: 12px;
+  padding: 20px;
+  min-width: 0;
+}
+
+.ai-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--quantum-border);
+  flex-shrink: 0;
+}
+
+.ai-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ai-title h3 {
+  font-size: 16px;
+  font-weight: 600;
+  background: linear-gradient(
+    90deg,
+    var(--quantum-primary),
+    var(--quantum-secondary)
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.ai-toggle-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ai-toggle-section label {
+  font-size: 13px;
+  color: var(--quantum-muted);
+}
+
+/* BUG FIX: .toggle-switch.neural had a subtle gradient from border to #3a3a4a
+   (inactive state). The active state was correct. No change needed for active,
+   but the inactive state gradient was slightly confusing — simplified to flat border color. */
+.toggle-switch.neural {
+  background: var(--quantum-border);
+}
+
+.toggle-switch.neural.active {
+  background: linear-gradient(
+    90deg,
+    var(--quantum-secondary),
+    var(--quantum-primary)
+  );
+  box-shadow: 0 0 10px rgba(124, 58, 237, 0.4);
+}
+
+.ai-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+
+.ai-metric {
+  background: var(--quantum-bg);
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid var(--quantum-border);
+}
+
+.metric-label {
+  font-size: 12px;
+  color: var(--quantum-muted);
+  margin-bottom: 8px;
+}
+
+.metric-value {
+  font-size: 26px;
+  font-family: "JetBrains Mono", monospace;
+  color: var(--quantum-primary);
+  margin-bottom: 8px;
+}
+
+/* AI Confidence Bar */
+.ai-confidence-bar {
+  margin-top: 8px;
+}
+
+.bar-track {
+  height: 8px;
+  background: var(--quantum-border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--quantum-accent),
+    var(--quantum-primary)
+  );
+  border-radius: 4px;
+  transition: width 0.5s ease;
+  box-shadow: 0 0 8px rgba(0, 212, 255, 0.5);
+}
+
+.bar-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--quantum-muted);
+  margin-top: 4px;
+}
+
+/* Predictive Success Bar */
+.predictive-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bar-segments {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+}
+
+.bar-segment {
+  flex: 1;
+  height: 16px;
+  background: var(--quantum-border);
+  border-radius: 2px;
+  transition: background 0.3s ease;
+}
+
+.bar-segment.filled {
+  background: linear-gradient(
+    135deg,
+    var(--quantum-secondary),
+    var(--quantum-primary)
+  );
+  box-shadow: 0 0 6px rgba(0, 212, 255, 0.3);
+}
+
+.bar-value {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 14px;
+  color: var(--quantum-accent);
+  min-width: 50px;
+  text-align: right;
+}
+
+.ai-description {
+  font-size: 11px;
+  color: var(--quantum-muted);
+  margin-top: 10px;
+  line-height: 1.4;
+}
+
+.ai-info {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  background: var(--quantum-bg);
+  border-radius: 8px;
+  border: 1px solid var(--quantum-border);
+}
+
+.ai-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.info-label {
+  font-size: 12px;
+  color: var(--quantum-muted);
+}
+
+.info-value {
+  font-size: 12px;
+  font-family: "JetBrains Mono", monospace;
+  color: var(--quantum-primary);
+}
+
+.neural-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(124, 58, 237, 0.1);
+  border: 1px solid rgba(124, 58, 237, 0.3);
+  border-radius: 8px;
+  margin-top: 16px;
+}
+
+.neural-status .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--quantum-secondary);
+  animation: pulse 2s infinite;
+}
+
+.neural-status span {
+  font-size: 12px;
+  color: var(--quantum-primary);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--quantum-surface);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--quantum-border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3a3a4a;
+}
+
+/* Responsive */
+@media (max-width: 1400px) {
+  .metrics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1100px) {
+  .charts-grid,
+  .analysis-grid,
+  .ai-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  html,
+  body,
+  #root {
+    overflow: auto;
+    height: auto;
+  }
+
+  .app-container {
+    height: auto;
+    min-height: 100vh;
+    flex-direction: column;
+    overflow: visible;
+  }
+
+  .sidebar {
+    width: 100%;
+    min-width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--quantum-border);
+  }
+
+  .main-content {
+    height: auto;
+    min-height: auto;
+  }
+
+  .dashboard {
+    overflow: visible;
+  }
+}
