@@ -58,14 +58,14 @@ QBitX bridges theory and practice by letting users **see, tweak, and fix noise i
 
 q-noise/
 ├── public/
-│ ├── icons.svg
-│ ├── favicon.svg
+│   ├── icons.svg
+│   └── favicon.svg
 │
 ├── src/
-│ ├── App.jsx
-│ ├── App.css
-│ ├── main.jsx
-│ └── index.css
+│   ├── App.jsx
+│   ├── App.css
+│   ├── main.jsx
+│   └── index.css
 │
 ├── index.html
 ├── package.json
@@ -74,7 +74,6 @@ q-noise/
 ├── eslint.config.js
 ├── .gitignore
 └── README.md
-
 ---
 
 ## ⚙️ Tech Stack
