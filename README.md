@@ -54,6 +54,28 @@ QBitX bridges theory and practice by letting users **see, tweak, and fix noise i
 
 
 ---
+## 📁 File Structure
+
+q-noise/
+├── public/
+│   ├── icons.svg
+│   ├── favicon.svg
+│
+├── src/
+│   ├── App.jsx
+│   ├── App.css
+│   ├── main.jsx
+│   └── index.css
+│
+├── index.html
+├── package.json
+├── package-lock.json
+├── vite.config.js
+├── eslint.config.js
+├── .gitignore
+└── README.md
+
+---
 
 ## ⚙️ Tech Stack
 
@@ -89,6 +111,28 @@ Leads to incorrect energy levels
 3. Visualize distorted output  
 4. Adjust mitigation controls  
 5. Compare before vs after  
+
+---
+
+## 🖥️ How to Run
+
+### 1. Clone the repository
+
+- bash
+git clone https://github.com/adityaarulmanalan/QNoise_QBitX.git
+cd QNoise_QBitX
+
+## Install dependencies
+npm install
+
+## Start Development Server
+npm run dev
+
+## Open in browser
+
+The app will run at:
+
+http://localhost:5173/
 
 ---
 
