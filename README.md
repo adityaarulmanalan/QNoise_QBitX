@@ -57,7 +57,7 @@ QBitX bridges theory and practice by letting users **see, tweak, and fix noise i
 ## 📁 File Structure
 
 q-noise/
-├── - public/
+├─public/
 │ ├── - icons.svg
 │ ├──  -favicon.svg
 │
