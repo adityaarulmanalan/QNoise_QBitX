@@ -9,7 +9,7 @@ Designed for developers, researchers, and students, Q-Noise provides a **real-ti
 ---
 
 ## 🌐 Live Demo
-[https://your-link.vercel.app](https://q-noise-q-bit-x.vercel.app/)
+[QBITX-QNOISE](https://q-noise-q-bit-x.vercel.app/)
 
 ---
 
