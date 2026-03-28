@@ -125,10 +125,10 @@
         );
       }
       .hud-border-h.top {
-        top: 22px;
+        top: 52px;
       }
       .hud-border-h.bot {
-        bottom: 22px;
+        bottom: 62px;
       }
       .hud-border-v {
         position: absolute;
@@ -144,10 +144,10 @@
         );
       }
       .hud-border-v.lft {
-        left: 22px;
+        left: 52px;
       }
       .hud-border-v.rgt {
-        right: 22px;
+        right: 52px;
       }
 
       .shield-info {
@@ -816,18 +816,154 @@
         color: rgba(0, 242, 255, 0.42);
       }
 
-      @media (max-width: 900px) {
-        .footer-grid {
-          grid-template-columns: 1fr;
+      /* make interactive things behave on touch devices */
+      #noise-knob,
+      #split-container,
+      #split-divider,
+      .hero-tag,
+      .footer-block a {
+        touch-action: none;
+      }
+
+      #osc-canvas,
+      #esp-canvas,
+      .split-container {
+        max-width: 100%;
+      }
+
+      /* better default scaling */
+      #osc-canvas {
+        width: min(560px, 100%);
+        height: auto;
+      }
+
+      #esp-canvas {
+        width: min(640px, 100%);
+        height: auto;
+      }
+
+      @media (max-width: 768px) {
+        body {
+          cursor: auto;
         }
 
-        .footer-brand,
-        .footer-block {
+        section {
           min-height: auto;
+          padding: 4.5rem 1rem;
+        }
+
+        #cursor,
+        #cursor-dot,
+        body::after {
+          display: none !important;
+        }
+
+        #hud {
+          display: none;
+        }
+
+        .glass {
+          padding: 1.25rem 1rem;
+        }
+
+        .hero-content,
+        .chaos-content,
+        .shield-header,
+        .hil-header {
+          padding: 1rem;
+        }
+
+        .hero-title {
+          font-size: clamp(2rem, 11vw, 3rem);
+          line-height: 1.08;
+        }
+
+        .hero-sub,
+        .section-body {
+          font-size: 0.92rem;
+          line-height: 1.7;
+          max-width: 100%;
+        }
+
+        .hero-tag {
+          margin-top: 2rem;
+          font-size: 10px;
+          padding: 0.55rem 0.9rem;
+        }
+
+        #chaos {
+          gap: 2rem;
+        }
+
+        #osc-canvas {
+          width: 100% !important;
+          max-width: 100%;
+          height: 140px !important;
+        }
+
+        .knob-wrap {
+          gap: 0.6rem;
+        }
+
+        #noise-knob {
+          width: 96px;
+          height: 96px;
+        }
+
+        .split-container {
+          width: 100%;
+          height: 220px;
+          cursor: ew-resize;
+        }
+
+        .split-handle {
+          width: 24px;
+          height: 24px;
+          font-size: 9px;
+        }
+
+        .shield-info {
+          gap: 1rem;
+          padding: 0 1rem;
+        }
+
+        .info-card {
+          min-width: 100%;
+          max-width: 100%;
+        }
+
+        #esp-canvas {
+          width: 100% !important;
+          height: auto !important;
+        }
+
+        .hil-caption {
+          font-size: 9px;
+          letter-spacing: 0.1em;
+          padding: 0 1rem;
+        }
+
+        #footer {
+          padding: 3rem 1rem 1.5rem;
+        }
+
+        .footer-grid {
+          grid-template-columns: 1fr;
+          gap: 1rem;
+        }
+
+        .footer-brand h3 {
+          font-size: 1.4rem;
+        }
+
+        .footer-copy {
+          max-width: 100%;
+          font-size: 0.88rem;
         }
 
         .footer-bottom {
-          flex-direction: column;
+          font-size: 9px;
+          gap: 0.6rem;
         }
       }
 
@@ -1280,37 +1416,25 @@
         const decEl = document.getElementById("hud-dec");
         const statusEl = document.getElementById("sys-status");
 
-        let noiseLevel = 0; // 0–1
-        let dragging = false,
-          startY = 0,
-          startVal = 0;
-
-        knob.addEventListener("mousedown", (e) => {
-          dragging = true;
-          startY = e.clientY;
-          startVal = noiseLevel;
-          e.preventDefault();
-        });
-        document.addEventListener("mousemove", (e) => {
-          if (!dragging) return;
-          const dy = (startY - e.clientY) / 140;
-          noiseLevel = Math.max(0, Math.min(1, startVal + dy));
-          updateKnob();
-        });
-        document.addEventListener("mouseup", () => {
-          dragging = false;
-        });
+        let noiseLevel = 0;
+        let dragging = false;
+        let startY = 0;
+        let startVal = 0;
+        let activePointerId = null;
 
         function updateKnob() {
           const deg = -135 + noiseLevel * 270;
           needle.style.transform = `translateX(-50%) rotate(${deg}deg)`;
+
           const pct = Math.round(noiseLevel * 100);
           valDisp.textContent = pct + "%";
           glitch.style.opacity = noiseLevel * 0.7;
+
           const snr =
             noiseLevel < 0.01 ? "∞" : (40 - noiseLevel * 38).toFixed(1);
           snrEl.textContent = snr;
           decEl.textContent = (noiseLevel * 100).toFixed(2);
+
           if (noiseLevel > 0.6) {
             statusEl.textContent = "DEGRADED";
             statusEl.style.color = "var(--red)";
@@ -1322,7 +1446,10 @@
             statusEl.style.color = "var(--cyan)";
           }
 
-          jitters.forEach((el, i) => {
+          const intensity = noiseLevel;
+          bg.style.background = `radial-gradient(circle at center, rgba(180, 20, 50, ${0.08 + intensity * 0.18}), var(--deep) 60%)`;
+
+          jitters.forEach((el) => {
             if (noiseLevel > 0.2 && Math.random() < noiseLevel * 0.4) {
               const sx = (Math.random() - 0.5) * noiseLevel * 12;
               const sy = (Math.random() - 0.5) * noiseLevel * 6;
@@ -1336,18 +1463,78 @@
           });
         }
 
+        function startDrag(clientY, pointerId = null) {
+          dragging = true;
+          activePointerId = pointerId;
+          startY = clientY;
+          startVal = noiseLevel;
+          knob.classList.add("active");
+        }
+
+        function moveDrag(clientY) {
+          if (!dragging) return;
+          const dy = (startY - clientY) / 140;
+          noiseLevel = Math.max(0, Math.min(1, startVal + dy));
+          updateKnob();
+        }
+
+        function endDrag(pointerId = null) {
+          if (
+            pointerId !== null &&
+            activePointerId !== null &&
+            pointerId !== activePointerId
+          )
+            return;
+          dragging = false;
+          activePointerId = null;
+          knob.classList.remove("active");
+        }
+
+        knob.addEventListener("pointerdown", (e) => {
+          startDrag(e.clientY, e.pointerId);
+          knob.setPointerCapture?.(e.pointerId);
+          e.preventDefault();
+        });
+
+        knob.addEventListener("pointermove", (e) => {
+          if (!dragging) return;
+          moveDrag(e.clientY);
+          e.preventDefault();
+        });
+
+        knob.addEventListener("pointerup", (e) => {
+          endDrag(e.pointerId);
+        });
+
+        knob.addEventListener("pointercancel", (e) => {
+          endDrag(e.pointerId);
+        });
+
+        document.addEventListener("pointermove", (e) => {
+          if (!dragging) return;
+          moveDrag(e.clientY);
+        });
+
+        document.addEventListener("pointerup", (e) => {
+          endDrag(e.pointerId);
+        });
+
+        updateKnob();
+
         let oscT = 0;
         function drawOsc() {
           ctx.clearRect(0, 0, W, H);
-          // grid
+
           ctx.strokeStyle = "rgba(0,242,255,0.06)";
           ctx.lineWidth = 1;
+
           for (let x = 0; x < W; x += W / 8) {
             ctx.beginPath();
             ctx.moveTo(x, 0);
             ctx.lineTo(x, H);
             ctx.stroke();
           }
+
           for (let y = 0; y < H; y += H / 4) {
             ctx.beginPath();
             ctx.moveTo(0, y);
@@ -1356,7 +1543,7 @@
           }
 
           oscT += 0.04;
-          // clean signal
+
           ctx.beginPath();
           for (let x = 0; x < W; x++) {
             const t = (x / W) * Math.PI * 4 + oscT;
@@ -1367,7 +1554,6 @@
           ctx.lineWidth = 1;
           ctx.stroke();
 
-          // noisy signal
           ctx.beginPath();
           for (let x = 0; x < W; x++) {
             const t = (x / W) * Math.PI * 4 + oscT;
@@ -1377,9 +1563,11 @@
             const y = H / 2 + Math.sin(t) * H * 0.28 + noise;
             x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
           }
+
           const rg = ctx.createLinearGradient(0, 0, W, 0);
-          const r = noiseLevel,
-            g = 1 - noiseLevel;
+          const r = noiseLevel;
+          const g = 1 - noiseLevel;
+
           rg.addColorStop(0, `rgba(0,242,255,0)`);
           rg.addColorStop(
             0.1,
@@ -1390,6 +1578,7 @@
             `rgba(${Math.round(r * 255)},${Math.round(g * 242)},${Math.round((1 - r) * 255)},0.9)`,
           );
           rg.addColorStop(1, `rgba(0,242,255,0)`);
+
           ctx.strokeStyle = rg;
           ctx.lineWidth = noiseLevel > 0.5 ? 1.5 : 2;
           ctx.shadowColor =
@@ -1400,6 +1589,7 @@
 
           requestAnimationFrame(drawOsc);
         }
+
         drawOsc();
       })();
 
@@ -1935,15 +2125,21 @@
             >Aditya Arul Manalan</a
           >
           <a
-            href="https://github.com/namanarchives"
+            href="https://www.linkedin.com/in/naman-kaushik-79023028a?utm_source=share_via&utm_content=profile&utm_medium=member_android"
             class="footer-stat"
             data-hover
             >Naman Kaushik</a
           >
-          <a href="https://github.com/itsTulsi" class="footer-stat" data-hover
+          <a
+            href="https://www.linkedin.com/in/tulsi-singh-19343b380?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
+            class="footer-stat"
+            data-hover
             >Tulsi</a
           >
-          <a href="https://github.com/avni99798" class="footer-stat" data-hover
+          <a
+            href="https://www.linkedin.com/in/avni-sharma-067515379?utm_source=share_via&utm_content=profile&utm_medium=member_android"
+            class="footer-stat"
+            data-hover
             >Anvi Sharma</a
           >
         </div>
