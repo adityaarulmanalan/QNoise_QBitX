@@ -46,6 +46,22 @@ QBitX bridges theory and practice by letting users **see, tweak, and fix noise i
 
 ---
 
+## 🌐 Live Experience (Interactive Website)
+
+The project includes a cinematic interactive website that explains quantum noise concepts visually:
+
+qnoise-website/
+  index.html
+
+### ✨ Features of the Website
+Immersive scroll-based storytelling (Signal → Chaos → Shield → Hardware)
+Real-time waveform simulation
+Interactive noise control (drag knob)
+Before vs After mitigation comparison
+Hardware-in-the-loop visualization (ESP32 concept)
+
+---
+
 ## 🏗️ Architecture
 
 [Signal Generator] → [Noise Engine] → [Visualization Layer]
