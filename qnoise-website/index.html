@@ -1,0 +1,1952 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Q-Noise // Quantum Hardware Noise Analysis Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&family=Inter:wght@100;200;300;400&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --deep: #050508;
+        --cyan: #00f2ff;
+        --red: #ff0055;
+        --purple: #b44aff;
+        --glass: rgba(5, 5, 12, 0.55);
+        --border: rgba(0, 242, 255, 0.18);
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        background: var(--deep);
+        color: #e0f7ff;
+        font-family: "Inter", sans-serif;
+        font-weight: 200;
+        cursor: none;
+        overflow-x: hidden;
+      }
+
+      /* ── CUSTOM CURSOR ── */
+      #cursor {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 9999;
+        width: 28px;
+        height: 28px;
+        border: 1.5px solid var(--cyan);
+        border-radius: 50%;
+        pointer-events: none;
+        transform: translate(-50%, -50%);
+        transition:
+          width 0.15s,
+          height 0.15s,
+          border-color 0.15s,
+          background 0.15s;
+        mix-blend-mode: screen;
+      }
+      #cursor.big {
+        width: 54px;
+        height: 54px;
+        background: rgba(0, 242, 255, 0.07);
+        border-color: var(--cyan);
+      }
+      #cursor-dot {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 9999;
+        width: 4px;
+        height: 4px;
+        background: var(--cyan);
+        border-radius: 50%;
+        pointer-events: none;
+        transform: translate(-50%, -50%);
+      }
+
+      /* ── HUD OVERLAY ── */
+      #hud {
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        pointer-events: none;
+      }
+      .hud-corner {
+        position: absolute;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        color: rgba(0, 242, 255, 0.35);
+        letter-spacing: 0.12em;
+        line-height: 1.8;
+      }
+      .hud-tl {
+        top: 18px;
+        left: 22px;
+      }
+      .hud-tr {
+        top: 18px;
+        right: 22px;
+        text-align: right;
+      }
+      .hud-bl {
+        bottom: 18px;
+        left: 22px;
+      }
+      .hud-br {
+        bottom: 18px;
+        right: 22px;
+        text-align: right;
+      }
+      .hud-border-h {
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(0, 242, 255, 0.25) 20%,
+          rgba(0, 242, 255, 0.25) 80%,
+          transparent
+        );
+      }
+      .hud-border-h.top {
+        top: 52px;
+      }
+      .hud-border-h.bot {
+        bottom: 52px;
+      }
+      .hud-border-v {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 1px;
+        background: linear-gradient(
+          180deg,
+          transparent,
+          rgba(0, 242, 255, 0.2) 20%,
+          rgba(0, 242, 255, 0.2) 80%,
+          transparent
+        );
+      }
+      .hud-border-v.lft {
+        left: 52px;
+      }
+      .hud-border-v.rgt {
+        right: 52px;
+      }
+
+      .shield-info {
+        display: flex;
+        gap: 2rem;
+        margin-top: 1.5rem;
+        z-index: 2;
+        padding: 0 2rem;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .info-card {
+        flex: 1;
+        min-width: 220px;
+        max-width: 280px;
+        padding: 1.4rem 1.8rem;
+      }
+
+      /* ── SECTION BASE ── */
+      section {
+        position: relative;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+
+      /* ──────────────────────────────
+     HERO — THE SIGNAL
+  ────────────────────────────── */
+      #hero {
+        flex-direction: column;
+        background: var(--deep);
+      }
+      #wave-canvas {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+      .hero-content {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        padding: 2rem;
+        pointer-events: none;
+      }
+      .hero-label {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+        letter-spacing: 0.3em;
+        color: var(--cyan);
+        opacity: 0.7;
+        margin-bottom: 1.4rem;
+        text-transform: uppercase;
+      }
+      .hero-title {
+        font-size: clamp(2.6rem, 6vw, 5.5rem);
+        font-weight: 100;
+        letter-spacing: -0.02em;
+        line-height: 1.12;
+        color: #fff;
+      }
+      .hero-title span {
+        color: var(--cyan);
+      }
+      .hero-sub {
+        margin-top: 1.4rem;
+        font-size: clamp(0.95rem, 1.5vw, 1.15rem);
+        font-weight: 200;
+        color: rgba(224, 247, 255, 0.55);
+        max-width: 480px;
+        margin-inline: auto;
+        letter-spacing: 0.02em;
+      }
+      .hero-tag {
+        margin-top: 3rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+        color: rgba(0, 242, 255, 0.5);
+        border: 1px solid rgba(0, 242, 255, 0.2);
+        padding: 0.45rem 1rem;
+        border-radius: 2px;
+        pointer-events: auto;
+        cursor: none;
+        background: transparent;
+        appearance: none;
+        -webkit-appearance: none;
+        outline: none;
+      }
+
+      .hero-tag::before {
+        content: "▶";
+        font-size: 8px;
+      }
+
+      .hero-tag:hover {
+        color: var(--cyan);
+        border-color: rgba(0, 242, 255, 0.45);
+      }
+
+      .hero-tag:focus {
+        border-color: rgba(0, 242, 255, 0.45);
+      }
+
+      /* ──────────────────────────────
+     SECTION 2 — THE CHAOS
+  ────────────────────────────── */
+      #chaos {
+        background: var(--deep);
+        flex-direction: column;
+        gap: 3rem;
+      }
+      #chaos-bg {
+        position: absolute;
+        inset: 0;
+        background: var(--deep);
+        transition: background 0.1s;
+      }
+      #glitch-overlay {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        pointer-events: none;
+        background: repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 2px,
+          rgba(255, 0, 85, 0.04) 2px,
+          rgba(255, 0, 85, 0.04) 4px
+        );
+      }
+      .chaos-content {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        max-width: 720px;
+        padding: 2rem;
+      }
+      .section-label {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 0.3em;
+        color: var(--cyan);
+        opacity: 0.65;
+        text-transform: uppercase;
+        margin-bottom: 1rem;
+      }
+      .section-title {
+        font-size: clamp(2rem, 4.5vw, 3.8rem);
+        font-weight: 100;
+        letter-spacing: -0.02em;
+        line-height: 1.15;
+        margin-bottom: 1.2rem;
+      }
+      .section-body {
+        font-size: 0.95rem;
+        color: rgba(224, 247, 255, 0.5);
+        line-height: 1.8;
+        max-width: 500px;
+        margin: 0 auto 2.5rem;
+      }
+      .jitter {
+        display: inline-block;
+      }
+
+      /* Oscilloscope */
+      #osc-canvas {
+        position: relative;
+        z-index: 2;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        background: rgba(0, 0, 0, 0.4);
+        display: block;
+      }
+
+      /* Noise Knob */
+      .knob-wrap {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.8rem;
+      }
+      .knob-label {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 0.2em;
+        color: rgba(0, 242, 255, 0.5);
+        text-transform: uppercase;
+      }
+      #noise-knob {
+        width: 88px;
+        height: 88px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 35% 30%, #1a1a2e, #0a0a14);
+        border: 2px solid rgba(0, 242, 255, 0.25);
+        position: relative;
+        cursor: none;
+        box-shadow:
+          0 0 30px rgba(0, 242, 255, 0.08),
+          inset 0 2px 6px rgba(0, 0, 0, 0.6);
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+        user-select: none;
+      }
+      #noise-knob::after {
+        content: "";
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 3px;
+        height: 18px;
+        background: var(--cyan);
+        border-radius: 2px;
+        transform-origin: bottom center;
+        /* JS will rotate */
+      }
+      #noise-knob.active {
+        border-color: var(--cyan);
+        box-shadow: 0 0 40px rgba(0, 242, 255, 0.2);
+      }
+      .knob-val {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 13px;
+        color: var(--cyan);
+      }
+
+      /* glass card */
+      .glass {
+        background: var(--glass);
+        border: 1px solid var(--border);
+        backdrop-filter: blur(20px) saturate(1.4);
+        -webkit-backdrop-filter: blur(20px) saturate(1.4);
+        border-radius: 6px;
+        padding: 2rem 2.5rem;
+      }
+
+      /* ──────────────────────────────
+     SECTION 3 — THE SHIELD
+  ────────────────────────────── */
+      #shield {
+        flex-direction: column;
+        background: var(--deep);
+        padding: 4rem 0;
+      }
+      .shield-header {
+        text-align: center;
+        z-index: 2;
+        padding: 0 2rem;
+        margin-bottom: 3rem;
+      }
+      .split-container {
+        position: relative;
+        width: min(900px, 94vw);
+        height: 340px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        overflow: hidden;
+        z-index: 2;
+        cursor: col-resize;
+      }
+      .split-panel {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+      }
+      #panel-left {
+        left: 0;
+        right: 0;
+        background: rgba(255, 0, 85, 0.04);
+      }
+      #panel-right {
+        left: 0;
+        right: 0;
+        background: rgba(180, 74, 255, 0.06);
+        clip-path: inset(0 0 0 50%); /* controlled by JS */
+      }
+      .panel-label {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: rgba(224, 247, 255, 0.4);
+        position: absolute;
+        top: 16px;
+      }
+      #panel-left .panel-label {
+        left: 20px;
+        color: rgba(255, 0, 85, 0.6);
+      }
+      #panel-right .panel-label {
+        left: calc(50% + 20px);
+        color: rgba(180, 74, 255, 0.7);
+      }
+      #shield-canvas-left,
+      #shield-canvas-right {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+      .split-divider {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(
+          180deg,
+          transparent,
+          var(--cyan) 20%,
+          var(--cyan) 80%,
+          transparent
+        );
+        left: 50%;
+        transform: translateX(-50%);
+        cursor: col-resize;
+        z-index: 10;
+      }
+      .split-handle {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 28px;
+        height: 28px;
+        background: var(--deep);
+        border: 1.5px solid var(--cyan);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        color: var(--cyan);
+      }
+      .shield-info {
+        display: flex;
+        gap: 2rem;
+        margin-top: 1.5rem;
+        z-index: 2;
+        padding: 0 2rem;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .info-card {
+        flex: 1;
+        min-width: 220px;
+        max-width: 300px;
+        padding: 1.4rem 1.8rem;
+      }
+      .info-card h3 {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+        letter-spacing: 0.2em;
+        margin-bottom: 0.7rem;
+      }
+      .info-card h3.red {
+        color: var(--red);
+      }
+      .info-card h3.purple {
+        color: var(--purple);
+      }
+      .info-card p {
+        font-size: 0.85rem;
+        color: rgba(224, 247, 255, 0.45);
+        line-height: 1.7;
+      }
+
+      /* ──────────────────────────────
+     SECTION 4 — HARDWARE IN LOOP
+  ────────────────────────────── */
+      #hil {
+        flex-direction: column;
+        background: var(--deep);
+        padding: 4rem 0 6rem;
+      }
+      .hil-header {
+        text-align: center;
+        z-index: 2;
+        margin-bottom: 3rem;
+        padding: 0 2rem;
+      }
+      #esp-canvas {
+        position: relative;
+        z-index: 2;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        background: rgba(0, 0, 0, 0.3);
+        display: block;
+        cursor: none;
+      }
+      .hil-caption {
+        margin-top: 1.5rem;
+        z-index: 2;
+        text-align: center;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        color: rgba(0, 242, 255, 0.4);
+        letter-spacing: 0.15em;
+      }
+
+      /* ── SCROLL FADE IN ── */
+      .fade-in {
+        opacity: 0;
+        transform: translateY(32px);
+        transition:
+          opacity 0.9s ease,
+          transform 0.9s ease;
+      }
+      .fade-in.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      #knob-needle {
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        width: 5px;
+        height: 30px;
+        border-radius: 999px;
+        transform-origin: bottom center;
+        transform: translateX(-50%) rotate(-135deg);
+
+        background: linear-gradient(
+          180deg,
+          rgba(180, 255, 255, 1) 0%,
+          rgba(0, 242, 255, 0.95) 60%,
+          rgba(0, 242, 255, 0.25) 100%
+        );
+
+        box-shadow: 0 0 14px rgba(0, 242, 255, 0.5);
+
+        transition:
+          transform 0.08s linear,
+          box-shadow 0.2s ease;
+      }
+
+      #noise-knob::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 12px;
+        height: 12px;
+        background: var(--cyan);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        box-shadow:
+          0 0 10px rgba(0, 242, 255, 0.5),
+          0 0 20px rgba(0, 242, 255, 0.2);
+      }
+
+      #noise-knob::after {
+        background: rgba(255, 0, 0, 0.47); /* reduce brightness */
+        box-shadow: none; /* remove glow */
+        opacity: 0.5;
+      }
+
+      .knob-wrap {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.45rem;
+      }
+
+      .knob-label {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 0.2em;
+        color: rgba(0, 242, 255, 0.5);
+        text-transform: uppercase;
+      }
+
+      .knob-hint {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 9px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: rgba(224, 247, 255, 0.34);
+        margin-bottom: 0.35rem;
+        opacity: 0.9;
+      }
+
+      .knob-hint::before {
+        content: "↕ ";
+        color: rgba(0, 242, 255, 0.72);
+      }
+
+      #noise-knob {
+        width: 88px;
+        height: 88px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 35% 30%, #1a1a2e, #0a0a14);
+        border: 2px solid rgba(0, 242, 255, 0.25);
+        position: relative;
+        cursor: ns-resize;
+        box-shadow:
+          0 0 30px rgba(0, 242, 255, 0.08),
+          inset 0 2px 6px rgba(0, 0, 0, 0.6);
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s,
+          transform 0.2s ease;
+        user-select: none;
+      }
+
+      #noise-knob:hover {
+        border-color: rgba(0, 242, 255, 0.45);
+        box-shadow:
+          0 0 36px rgba(0, 242, 255, 0.14),
+          inset 0 2px 6px rgba(0, 0, 0, 0.6);
+      }
+
+      #noise-knob::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 9px;
+        height: 9px;
+        background: rgba(0, 242, 255, 0.72);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        box-shadow:
+          0 0 6px rgba(0, 242, 255, 0.22),
+          0 0 12px rgba(0, 242, 255, 0.08);
+      }
+
+      #noise-knob.active {
+        border-color: var(--cyan);
+        box-shadow: 0 0 40px rgba(0, 242, 255, 0.2);
+        transform: scale(1.03);
+      }
+
+      /* ──────────────────────────────
+   FOOTER
+────────────────────────────── */
+      #footer {
+        position: relative;
+        background: var(--deep);
+        padding: 4rem 6vw 2rem;
+        border-top: 1px solid rgba(0, 242, 255, 0.14);
+        overflow: hidden;
+      }
+
+      #footer::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 8%;
+        right: 8%;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(0, 242, 255, 0.28),
+          transparent
+        );
+      }
+
+      .footer-grid {
+        position: relative;
+        z-index: 2;
+        display: grid;
+        grid-template-columns: 1.4fr 1fr 1fr;
+        gap: 1.25rem;
+        width: min(1200px, 100%);
+        margin: 0 auto;
+      }
+
+      .footer-brand,
+      .footer-block {
+        min-height: 190px;
+      }
+
+      .footer-label {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 0.24em;
+        text-transform: uppercase;
+        color: rgba(0, 242, 255, 0.58);
+        margin-bottom: 1rem;
+      }
+
+      .footer-brand h3 {
+        font-size: 1.8rem;
+        font-weight: 200;
+        letter-spacing: 0.08em;
+        color: #fff;
+        margin-bottom: 1rem;
+      }
+
+      .footer-copy {
+        font-size: 0.92rem;
+        line-height: 1.8;
+        color: rgba(224, 247, 255, 0.5);
+        max-width: 420px;
+      }
+
+      .footer-block {
+        display: flex;
+        flex-direction: column;
+        gap: 0.85rem;
+      }
+
+      .footer-block a,
+      .footer-stat {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: rgba(224, 247, 255, 0.62);
+        text-decoration: none;
+        transition:
+          color 0.2s ease,
+          transform 0.2s ease;
+      }
+
+      .footer-block a:hover {
+        color: var(--cyan);
+        transform: translateX(4px);
+      }
+
+      .footer-stat {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        padding-bottom: 0.45rem;
+        border-bottom: 1px solid rgba(0, 242, 255, 0.08);
+      }
+
+      .footer-stat span {
+        color: var(--cyan);
+      }
+
+      .footer-bottom {
+        width: min(1200px, 100%);
+        margin: 1.5rem auto 0;
+        padding-top: 1.2rem;
+        border-top: 1px solid rgba(0, 242, 255, 0.08);
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: rgba(0, 242, 255, 0.42);
+      }
+
+      @media (max-width: 900px) {
+        .footer-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .footer-brand,
+        .footer-block {
+          min-height: auto;
+        }
+
+        .footer-bottom {
+          flex-direction: column;
+        }
+      }
+
+      /* ──────────────────────────────
+   HUD CORNER SOFTENING
+────────────────────────────── */
+      .corner,
+      .hud-corner,
+      .corner-label {
+        opacity: 0.78; /* main control */
+        filter: brightness(0.7);
+      }
+
+      .corner *,
+      .hud-corner *,
+      .corner-label * {
+        color: rgba(0, 242, 255, 0.35) !important;
+      }
+
+      /* if borders exist */
+      .corner,
+      .hud-corner {
+        border-color: rgba(0, 242, 255, 0.15) !important;
+      }
+
+      /* if lines/glows exist */
+      .corner::before,
+      .corner::after,
+      .hud-corner::before,
+      .hud-corner::after {
+        opacity: 0.2;
+      }
+
+      /* ── SCANLINE on BODY ── */
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 9998;
+        background: repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 3px,
+          rgba(0, 0, 0, 0.07) 3px,
+          rgba(0, 0, 0, 0.07) 4px
+        );
+        animation: scanMove 12s linear infinite;
+      }
+      @keyframes scanMove {
+        0% {
+          background-position: 0 0;
+        }
+        100% {
+          background-position: 0 -800px;
+        }
+      }
+
+      /* responsive */
+      @media (max-width: 600px) {
+        .split-container {
+          height: 240px;
+        }
+        #osc-canvas {
+          width: 320px !important;
+          height: 120px !important;
+        }
+        #esp-canvas {
+          width: 320px !important;
+          height: 200px !important;
+        }
+      }
+
+      .no-select,
+      .no-select * {
+        user-select: none !important;
+        -webkit-user-select: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- CURSOR -->
+    <div id="cursor"></div>
+    <div id="cursor-dot"></div>
+
+    <!-- HUD -->
+    <div id="hud">
+      <div class="hud-corner hud-tl">
+        Q-NOISE // v2.4.1<br />
+        SYS.STATUS
+        <span id="sys-status" style="color: var(--cyan)">NOMINAL</span><br />
+        FREQ <span id="hud-freq" style="color: var(--cyan)">440.00</span> Hz
+      </div>
+      <div class="hud-corner hud-tr">
+        12.8231°N // 80.0444°E<br />
+        <span id="hud-time"></span><br />
+        SNR <span id="hud-snr" style="color: var(--cyan)">∞</span> dB
+      </div>
+      <div class="hud-corner hud-bl">
+        RLC.FILTER // ACTIVE<br />
+        NEURAL.PREDICTOR // STANDBY<br />
+        DECOHERENCE <span id="hud-dec" style="color: var(--red)">0.00</span>%
+      </div>
+      <div class="hud-corner hud-br">
+        ESP32-S3 // CONNECTED<br />
+        ADC.SAMPLES 4096<br />
+        LOOP <span id="hud-loop" style="color: var(--cyan)">12.3</span> μs
+      </div>
+      <div class="hud-border-h top"></div>
+      <div class="hud-border-h bot"></div>
+      <div class="hud-border-v lft"></div>
+      <div class="hud-border-v rgt"></div>
+    </div>
+
+    <!-- ═══════════════════════════════
+     HERO — THE SIGNAL
+════════════════════════════════ -->
+    <section id="hero">
+      <canvas id="wave-canvas"></canvas>
+      <div class="hero-content fade-in visible">
+        <p class="hero-label">// Section 01 — The Signal</p>
+        <h1 class="hero-title">
+          Quantum states<br />are <span>perfect.</span><br />Until they aren't.
+        </h1>
+        <p class="hero-sub">
+          A journey through decoherence, noise, and the algorithms that fight
+          back.
+        </p>
+        <button class="hero-tag" id="scroll-to-chaos" type="button" data-hover>
+          Scroll to explore the chaos
+        </button>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════
+     SECTION 2 — THE CHAOS
+════════════════════════════════ -->
+    <section id="chaos">
+      <div id="chaos-bg"></div>
+      <div id="glitch-overlay"></div>
+
+      <div class="chaos-content glass fade-in">
+        <p class="section-label">// Section 02 — The Chaos</p>
+        <h2 class="section-title">
+          <span class="jitter" id="jt1">Deco</span
+          ><span class="jitter" id="jt2">her</span
+          ><span class="jitter" id="jt3">ence</span>
+        </h2>
+        <p class="section-body">
+          When a quantum bit interacts with its environment, the fragile
+          superposition collapses. Every electromagnetic whisper, every thermal
+          fluctuation — is your signal's enemy. Turn the knob. Feel the
+          breakdown.
+        </p>
+
+        <div
+          style="
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+          "
+        >
+          <canvas id="osc-canvas" width="560" height="140"></canvas>
+
+          <div class="knob-wrap">
+            <span class="knob-label">Noise Level</span>
+            <span class="knob-hint">Drag to inject noise</span>
+            <div id="noise-knob" data-hover>
+              <div id="knob-needle"></div>
+            </div>
+            <span class="knob-val" id="knob-val-display">0%</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════
+     SECTION 3 — THE SHIELD
+════════════════════════════════ -->
+    <section id="shield">
+      <div class="shield-header fade-in">
+        <p class="section-label">// Section 03 — The Shield</p>
+        <h2 class="section-title">Two weapons.<br />One signal.</h2>
+        <p class="section-body" style="margin: 0 auto">
+          Drag the divider. Watch the RLC filter smooth the chaos — then see the
+          Neural Predictor erase it entirely.
+        </p>
+      </div>
+
+      <div class="split-container fade-in" id="split-container" data-hover>
+        <canvas id="shield-canvas-left"></canvas>
+        <canvas id="shield-canvas-right"></canvas>
+        <div
+          class="panel-label"
+          style="
+            position: absolute;
+            top: 16px;
+            left: 20px;
+            font-family: &quot;JetBrains Mono&quot;, monospace;
+            font-size: 10px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: rgba(255, 0, 85, 0.7);
+            z-index: 5;
+          "
+        >
+          RLC FILTER
+        </div>
+        <div
+          class="panel-label"
+          id="right-label"
+          style="
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            font-family: &quot;JetBrains Mono&quot;, monospace;
+            font-size: 10px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: rgba(180, 74, 255, 0.8);
+            z-index: 5;
+          "
+        >
+          NEURAL PREDICTOR
+        </div>
+        <div class="split-divider" id="split-divider">
+          <div class="split-handle">⇄</div>
+        </div>
+      </div>
+
+      <div class="shield-info fade-in">
+        <div class="glass info-card">
+          <h3 class="red">// RLC FILTER</h3>
+          <p>
+            A passive analog circuit — resistor, inductor, capacitor — that
+            attenuates high-frequency noise. Simple, reliable, but introduces
+            phase lag. The old guard.
+          </p>
+        </div>
+
+        <div class="glass info-card">
+          <h3 class="cyan">// REFERENCE SIGNAL</h3>
+          <p>
+            The ideal sine wave used as the baseline. It represents the clean
+            target signal before decoherence, interference, and phase distortion
+            affect the system.
+          </p>
+        </div>
+
+        <div class="glass info-card">
+          <h3 class="purple">// NEURAL PREDICTOR</h3>
+          <p>
+            An LSTM trained on noise signatures. It doesn't just filter — it
+            anticipates. Zero phase distortion. Learns the noise profile in
+            real-time. The new weapon.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════
+     SECTION 4 — HARDWARE-IN-LOOP
+════════════════════════════════ -->
+    <section id="hil">
+      <div class="hil-header fade-in">
+        <p class="section-label">// Section 04 — Hardware In The Loop</p>
+        <h2 class="section-title">Where software<br />meets silicon.</h2>
+        <p class="section-body" style="margin: 0 auto">
+          Hover over the ESP32. Watch the system assemble itself — from bare
+          metal to neural inference.
+        </p>
+      </div>
+
+      <canvas
+        id="esp-canvas"
+        width="640"
+        height="320"
+        data-hover
+        class="fade-in"
+      ></canvas>
+      <p class="hil-caption fade-in">
+        ESP32-S3 // RLC CIRCUIT // NEURAL RUNTIME // DASHBOARD
+      </p>
+    </section>
+
+    <script>
+      if ("scrollRestoration" in history) {
+        history.scrollRestoration = "manual";
+      }
+
+      window.addEventListener("load", () => {
+        if (!window.location.hash || window.location.hash === "#chaos") {
+          window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+          if (window.location.hash) {
+            history.replaceState(
+              null,
+              "",
+              window.location.pathname + window.location.search,
+            );
+          }
+        }
+      });
+      /* ═══════════════════════════════════════
+   CURSOR
+═══════════════════════════════════════ */
+      const cursor = document.getElementById("cursor");
+      const cursorDot = document.getElementById("cursor-dot");
+      let mx = -200,
+        my = -200;
+      document.addEventListener("mousemove", (e) => {
+        mx = e.clientX;
+        my = e.clientY;
+        cursor.style.left = mx + "px";
+        cursor.style.top = my + "px";
+        cursorDot.style.left = mx + "px";
+        cursorDot.style.top = my + "px";
+      });
+      document.querySelectorAll("[data-hover]").forEach((el) => {
+        el.addEventListener("mouseenter", () => cursor.classList.add("big"));
+        el.addEventListener("mouseleave", () => cursor.classList.remove("big"));
+      });
+
+      /* ═══════════════════════════════════════
+   HUD CLOCK
+═══════════════════════════════════════ */
+      function updateHUD() {
+        const now = new Date();
+        document.getElementById("hud-time").textContent =
+          now.toISOString().slice(11, 19) + " UTC";
+        document.getElementById("hud-loop").textContent = (
+          11.8 +
+          Math.sin(Date.now() / 3000) * 1.2
+        ).toFixed(1);
+      }
+      setInterval(updateHUD, 1000);
+      updateHUD();
+
+      /* ═══════════════════════════════════════
+   SCROLL FADE-IN
+═══════════════════════════════════════ */
+      const fadeEls = document.querySelectorAll(".fade-in:not(.visible)");
+      const obs = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) e.target.classList.add("visible");
+          });
+        },
+        { threshold: 0.12 },
+      );
+      fadeEls.forEach((el) => obs.observe(el));
+
+      /* ═══════════════════════════════════════
+   HERO WAVE — magnetic cursor
+═══════════════════════════════════════ */
+      (function () {
+        const canvas = document.getElementById("wave-canvas");
+        const ctx = canvas.getContext("2d");
+        let W, H;
+        function resize() {
+          W = canvas.width = canvas.offsetWidth;
+          H = canvas.height = canvas.offsetHeight;
+        }
+        window.addEventListener("resize", resize);
+        resize();
+
+        let heroMX = 0.5,
+          heroMY = 0.5;
+        document.getElementById("hero").addEventListener("mousemove", (e) => {
+          heroMX = e.clientX / W;
+          heroMY = e.clientY / H;
+        });
+
+        let t = 0;
+        function drawWave() {
+          ctx.clearRect(0, 0, W, H);
+          t += 0.012;
+
+          const numWaves = 5;
+          for (let w = 0; w < numWaves; w++) {
+            const amp = 40 + w * 18;
+            const freq = 0.007 + w * 0.002;
+            const speed = t * (1 + w * 0.15);
+            const yBase = H * 0.5 + (w - numWaves / 2) * 38;
+            const alpha = 0.06 + (numWaves - w) * 0.04;
+            const hue = w < 2 ? "0,242,255" : w < 4 ? "180,74,255" : "255,0,85";
+
+            ctx.beginPath();
+            ctx.moveTo(0, yBase);
+            for (let x = 0; x <= W; x += 2) {
+              const dist = Math.abs(x / W - heroMX);
+              const mag = Math.max(0, 1 - dist * 3) * (heroMY - 0.5) * 60;
+              const y =
+                yBase +
+                Math.sin(x * freq + speed) * amp +
+                Math.sin(x * freq * 0.5 - speed * 0.7) * (amp * 0.4) +
+                mag * Math.exp(-dist * dist * 4);
+              ctx.lineTo(x, y);
+            }
+            ctx.strokeStyle = "rgba(255,255,255,0.28)";
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+          }
+
+          // main bright wave
+          ctx.beginPath();
+          ctx.moveTo(0, H * 0.5);
+          for (let x = 0; x <= W; x += 2) {
+            const dist = Math.abs(x / W - heroMX);
+            const mag = Math.max(0, 1 - dist * 2.5) * (heroMY - 0.5) * 90;
+            const y =
+              H * 0.5 +
+              Math.sin(x * 0.006 + t) * 55 +
+              Math.sin(x * 0.011 - t * 1.3) * 22 +
+              mag * Math.exp(-dist * dist * 3);
+            ctx.lineTo(x, y);
+          }
+          const grad = ctx.createLinearGradient(0, 0, W, 0);
+          grad.addColorStop(0, "rgba(0,242,255,0)");
+          grad.addColorStop(0.2, "rgba(0,242,255,0.8)");
+          grad.addColorStop(0.8, "rgba(0,242,255,0.8)");
+          grad.addColorStop(1, "rgba(0,242,255,0)");
+          ctx.strokeStyle = grad;
+          ctx.lineWidth = 2;
+          ctx.shadowColor = "rgba(0,242,255,0.6)";
+          ctx.shadowBlur = 12;
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+
+          requestAnimationFrame(drawWave);
+        }
+        drawWave();
+      })();
+
+      /* ═══════════════════════════════════════
+   OSCILLOSCOPE + NOISE KNOB
+═══════════════════════════════════════ */
+      (function () {
+        const canvas = document.getElementById("osc-canvas");
+        const ctx = canvas.getContext("2d");
+        const W = canvas.width,
+          H = canvas.height;
+        const knob = document.getElementById("noise-knob");
+        const needle = document.getElementById("knob-needle");
+        const valDisp = document.getElementById("knob-val-display");
+        const glitch = document.getElementById("glitch-overlay");
+        const bg = document.getElementById("chaos-bg");
+        const jitters = document.querySelectorAll(".jitter");
+        const snrEl = document.getElementById("hud-snr");
+        const decEl = document.getElementById("hud-dec");
+        const statusEl = document.getElementById("sys-status");
+
+        let noiseLevel = 0; // 0–1
+        let dragging = false,
+          startY = 0,
+          startVal = 0;
+
+        knob.addEventListener("mousedown", (e) => {
+          dragging = true;
+          startY = e.clientY;
+          startVal = noiseLevel;
+          e.preventDefault();
+        });
+        document.addEventListener("mousemove", (e) => {
+          if (!dragging) return;
+          const dy = (startY - e.clientY) / 140;
+          noiseLevel = Math.max(0, Math.min(1, startVal + dy));
+          updateKnob();
+        });
+        document.addEventListener("mouseup", () => {
+          dragging = false;
+        });
+
+        function updateKnob() {
+          const deg = -135 + noiseLevel * 270;
+          needle.style.transform = `translateX(-50%) rotate(${deg}deg)`;
+          const pct = Math.round(noiseLevel * 100);
+          valDisp.textContent = pct + "%";
+          glitch.style.opacity = noiseLevel * 0.7;
+          const snr =
+            noiseLevel < 0.01 ? "∞" : (40 - noiseLevel * 38).toFixed(1);
+          snrEl.textContent = snr;
+          decEl.textContent = (noiseLevel * 100).toFixed(2);
+          if (noiseLevel > 0.6) {
+            statusEl.textContent = "DEGRADED";
+            statusEl.style.color = "var(--red)";
+          } else if (noiseLevel > 0.25) {
+            statusEl.textContent = "WARNING";
+            statusEl.style.color = "#ffaa00";
+          } else {
+            statusEl.textContent = "NOMINAL";
+            statusEl.style.color = "var(--cyan)";
+          }
+
+          jitters.forEach((el, i) => {
+            if (noiseLevel > 0.2 && Math.random() < noiseLevel * 0.4) {
+              const sx = (Math.random() - 0.5) * noiseLevel * 12;
+              const sy = (Math.random() - 0.5) * noiseLevel * 6;
+              el.style.transform = `skew(${sx}deg, ${sy}deg) translateX(${(Math.random() - 0.5) * noiseLevel * 8}px)`;
+              el.style.color =
+                noiseLevel > 0.6 ? `hsl(${Math.random() * 360},90%,70%)` : "";
+            } else {
+              el.style.transform = "";
+              el.style.color = "";
+            }
+          });
+        }
+
+        let oscT = 0;
+        function drawOsc() {
+          ctx.clearRect(0, 0, W, H);
+          // grid
+          ctx.strokeStyle = "rgba(0,242,255,0.06)";
+          ctx.lineWidth = 1;
+          for (let x = 0; x < W; x += W / 8) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, H);
+            ctx.stroke();
+          }
+          for (let y = 0; y < H; y += H / 4) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(W, y);
+            ctx.stroke();
+          }
+
+          oscT += 0.04;
+          // clean signal
+          ctx.beginPath();
+          for (let x = 0; x < W; x++) {
+            const t = (x / W) * Math.PI * 4 + oscT;
+            const y = H / 2 + Math.sin(t) * H * 0.28;
+            x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+          }
+          ctx.strokeStyle = "rgba(0,242,255,0.3)";
+          ctx.lineWidth = 1;
+          ctx.stroke();
+
+          // noisy signal
+          ctx.beginPath();
+          for (let x = 0; x < W; x++) {
+            const t = (x / W) * Math.PI * 4 + oscT;
+            const noise =
+              (Math.random() - 0.5) * 2 * noiseLevel * H * 0.5 +
+              Math.sin(x * 0.08 + oscT * 3) * noiseLevel * H * 0.12;
+            const y = H / 2 + Math.sin(t) * H * 0.28 + noise;
+            x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+          }
+          const rg = ctx.createLinearGradient(0, 0, W, 0);
+          const r = noiseLevel,
+            g = 1 - noiseLevel;
+          rg.addColorStop(0, `rgba(0,242,255,0)`);
+          rg.addColorStop(
+            0.1,
+            `rgba(${Math.round(r * 255)},${Math.round(g * 242)},${Math.round((1 - r) * 255)},0.9)`,
+          );
+          rg.addColorStop(
+            0.9,
+            `rgba(${Math.round(r * 255)},${Math.round(g * 242)},${Math.round((1 - r) * 255)},0.9)`,
+          );
+          rg.addColorStop(1, `rgba(0,242,255,0)`);
+          ctx.strokeStyle = rg;
+          ctx.lineWidth = noiseLevel > 0.5 ? 1.5 : 2;
+          ctx.shadowColor =
+            noiseLevel > 0.5 ? "rgba(255,0,85,0.4)" : "rgba(0,242,255,0.4)";
+          ctx.shadowBlur = 8;
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+
+          requestAnimationFrame(drawOsc);
+        }
+        drawOsc();
+      })();
+
+      /* ═══════════════════════════════════════
+   BEFORE/AFTER SHIELD SLIDER
+═══════════════════════════════════════ */
+      (function () {
+        const container = document.getElementById("split-container");
+        const divider = document.getElementById("split-divider");
+        const canvasL = document.getElementById("shield-canvas-left");
+        const canvasR = document.getElementById("shield-canvas-right");
+        const rightLabel = document.getElementById("right-label");
+
+        let splitX = 0.5;
+        let dragging = false;
+
+        function resize() {
+          canvasL.width = canvasR.width = container.offsetWidth;
+          canvasL.height = canvasR.height = container.offsetHeight;
+        }
+        window.addEventListener("resize", resize);
+        resize();
+
+        container.addEventListener("mousedown", (e) => {
+          dragging = true;
+          document.body.classList.add("no-select");
+          e.preventDefault();
+        });
+
+        document.addEventListener("mouseup", () => {
+          dragging = false;
+          document.body.classList.remove("no-select");
+        });
+        document.addEventListener("mousemove", (e) => {
+          if (!dragging) return;
+          const rect = container.getBoundingClientRect();
+          splitX = Math.max(
+            0.05,
+            Math.min(0.95, (e.clientX - rect.left) / rect.width),
+          );
+          divider.style.left = splitX * 100 + "%";
+          rightLabel.style.left = splitX * 100 + 2 + "%";
+          rightLabel.style.right = "auto";
+        });
+
+        // touch
+        container.addEventListener(
+          "touchmove",
+          (e) => {
+            e.preventDefault();
+            const rect = container.getBoundingClientRect();
+            splitX = Math.max(
+              0.05,
+              Math.min(0.95, (e.touches[0].clientX - rect.left) / rect.width),
+            );
+            divider.style.left = splitX * 100 + "%";
+          },
+          { passive: false },
+        );
+
+        let shT = 0;
+        function drawShield() {
+          shT += 0.025;
+          const W = canvasL.width,
+            H = canvasL.height;
+          const ctxL = canvasL.getContext("2d");
+          const ctxR = canvasR.getContext("2d");
+
+          function drawReferenceSine(ctx) {
+            ctx.beginPath();
+            for (let x = 0; x < W; x++) {
+              const t = (x / W) * Math.PI * 6 + shT;
+              const y = H / 2 + Math.sin(t) * H * 0.3;
+              x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+            }
+            ctx.strokeStyle = "rgba(255,255,255,1)";
+            ctx.lineWidth = 1;
+            ctx.setLineDash([0, 0]);
+            ctx.stroke();
+            ctx.setLineDash([]);
+          }
+
+          // LEFT — noisy RLC filtered
+          ctxL.clearRect(0, 0, W, H);
+          drawReferenceSine(ctxL);
+          ctxL.beginPath();
+          for (let x = 0; x < W; x++) {
+            const prog = x / W;
+            const t = prog * Math.PI * 6 + shT;
+            const noise =
+              Math.sin(t * 3.7) * 8 +
+              Math.sin(t * 7.1) * 4 +
+              (Math.random() - 0.5) * 6;
+            const filtered = Math.sin(t) * H * 0.3 + noise * 0.3; // RLC smooths but delays
+            const y = H / 2 + filtered + Math.sin(t + 0.4) * H * 0.05; // small phase shift
+            x === 0 ? ctxL.moveTo(x, y) : ctxL.lineTo(x, y);
+          }
+          ctxL.strokeStyle = "rgba(255,0,85,0.8)";
+          ctxL.lineWidth = 2;
+          ctxL.shadowColor = "rgba(255,0,85,0.4)";
+          ctxL.shadowBlur = 10;
+          ctxL.stroke();
+          ctxL.shadowBlur = 0;
+
+          // clip right to splitX
+          ctxR.clearRect(0, 0, W, H);
+          ctxR.save();
+          ctxR.beginPath();
+          ctxR.rect(splitX * W, 0, W * (1 - splitX), H);
+          ctxR.clip();
+          drawReferenceSine(ctxR);
+
+          // RIGHT — neural clean
+          ctxR.beginPath();
+          for (let x = 0; x < W; x++) {
+            const t = (x / W) * Math.PI * 6 + shT;
+            const y = H / 2 + Math.sin(t) * H * 0.3;
+            x === 0 ? ctxR.moveTo(x, y) : ctxR.lineTo(x, y);
+          }
+          const rGrad = ctxR.createLinearGradient(0, 0, W, 0);
+          rGrad.addColorStop(0, "rgba(180,74,255,0)");
+          rGrad.addColorStop(0.2, "rgba(180,74,255,0.9)");
+          rGrad.addColorStop(0.8, "rgba(180,74,255,0.9)");
+          rGrad.addColorStop(1, "rgba(180,74,255,0)");
+          ctxR.strokeStyle = rGrad;
+          ctxR.lineWidth = 2.5;
+          ctxR.shadowColor = "rgba(180,74,255,0.6)";
+          ctxR.shadowBlur = 16;
+          ctxR.stroke();
+          ctxR.shadowBlur = 0;
+
+          // glow fill
+          ctxR.beginPath();
+          ctxR.moveTo(0, H / 2);
+          for (let x = 0; x < W; x++) {
+            const t = (x / W) * Math.PI * 6 + shT;
+            ctxR.lineTo(x, H / 2 + Math.sin(t) * H * 0.3);
+          }
+          ctxR.lineTo(W, H / 2);
+          ctxR.closePath();
+          const fillG = ctxR.createLinearGradient(
+            0,
+            H / 2 - H * 0.3,
+            0,
+            H / 2 + H * 0.3,
+          );
+          fillG.addColorStop(0, "rgba(180,74,255,0.08)");
+          fillG.addColorStop(1, "rgba(180,74,255,0)");
+          ctxR.fillStyle = fillG;
+          ctxR.fill();
+
+          ctxR.restore();
+          requestAnimationFrame(drawShield);
+        }
+        drawShield();
+      })();
+
+      /* ═══════════════════════════════════════
+   ESP32 WIREFRAME
+═══════════════════════════════════════ */
+      (function () {
+        const canvas = document.getElementById("esp-canvas");
+        const ctx = canvas.getContext("2d");
+        const W = canvas.width,
+          H = canvas.height;
+        let hovered = false;
+        let assembleProgress = 0;
+
+        canvas.addEventListener("mouseenter", () => {
+          hovered = true;
+        });
+        canvas.addEventListener("mouseleave", () => {
+          hovered = false;
+        });
+
+        // ESP32 component definitions
+        const pcbW = 360,
+          pcbH = 200;
+        const pcbX = (W - pcbW) / 2,
+          pcbY = (H - pcbH) / 2;
+
+        const components = [
+          {
+            label: "ESP32-S3",
+            x: pcbX + 160,
+            y: pcbY + 75,
+            w: 50,
+            h: 40,
+            color: "0,242,255",
+            delay: 0,
+          },
+          {
+            label: "RLC CIRCUIT",
+            x: pcbX + 40,
+            y: pcbY + 60,
+            w: 70,
+            h: 50,
+            color: "255,0,85",
+            delay: 0.15,
+          },
+          {
+            label: "ADC",
+            x: pcbX + 240,
+            y: pcbY + 50,
+            w: 40,
+            h: 30,
+            color: "180,74,255",
+            delay: 0.3,
+          },
+          {
+            label: "WIFI ANT",
+            x: pcbX + 305,
+            y: pcbY + 30,
+            w: 35,
+            h: 20,
+            color: "0,242,255",
+            delay: 0.45,
+          },
+          {
+            label: "PWR REG",
+            x: pcbX + 70,
+            y: pcbY + 130,
+            w: 35,
+            h: 25,
+            color: "255,180,0",
+            delay: 0.6,
+          },
+          {
+            label: "FLASH",
+            x: pcbX + 165,
+            y: pcbY + 130,
+            w: 40,
+            h: 25,
+            color: "0,242,255",
+            delay: 0.75,
+          },
+          {
+            label: "USB-C",
+            x: pcbX + 290,
+            y: pcbY + 130,
+            w: 30,
+            h: 25,
+            color: "100,200,255",
+            delay: 0.9,
+          },
+        ];
+
+        // pin rows
+        const pins = [];
+        for (let i = 0; i < 20; i++) {
+          pins.push({
+            x: pcbX,
+            y: pcbY + 10 + i * 9.5,
+            side: "L",
+            delay: i * 0.03,
+          });
+          if (i < 16)
+            pins.push({
+              x: pcbX + pcbW,
+              y: pcbY + 20 + i * 11,
+              side: "R",
+              delay: i * 0.03 + 0.1,
+            });
+        }
+
+        // traces
+        const traces = [
+          {
+            x1: pcbX + 185,
+            y1: pcbY + 95,
+            x2: pcbX + 110,
+            y2: pcbY + 85,
+            color: "255,0,85",
+            label: "SIGNAL IN",
+          },
+          {
+            x1: pcbX + 185,
+            y1: pcbY + 75,
+            x2: pcbX + 260,
+            y2: pcbY + 65,
+            color: "180,74,255",
+            label: "ADC LINE",
+          },
+          {
+            x1: pcbX + 260,
+            y1: pcbY + 65,
+            x2: pcbX + 320,
+            y2: pcbY + 40,
+            color: "0,242,255",
+            label: "RF",
+          },
+          {
+            x1: pcbX + 185,
+            y1: pcbY + 115,
+            x2: pcbX + 185,
+            y2: pcbY + 130,
+            color: "0,242,255",
+            label: "DATA",
+          },
+          {
+            x1: pcbX + 105,
+            y1: pcbY + 130,
+            x2: pcbX + 165,
+            y2: pcbY + 142,
+            color: "255,180,0",
+            label: "VCC",
+          },
+        ];
+
+        let espT = 0;
+        function drawESP() {
+          ctx.clearRect(0, 0, W, H);
+          espT += 0.02;
+
+          if (hovered && assembleProgress < 1)
+            assembleProgress = Math.min(1, assembleProgress + 0.025);
+          if (!hovered && assembleProgress > 0)
+            assembleProgress = Math.max(0, assembleProgress - 0.015);
+
+          const p = assembleProgress;
+          // eased
+          const ease = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+
+          // PCB board
+          const boardAlpha = 0.12 + ease * 0.15;
+          ctx.strokeStyle = `rgba(0,242,255,${0.3 + ease * 0.4})`;
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.roundRect(pcbX, pcbY, pcbW, pcbH, 8);
+          ctx.stroke();
+          ctx.fillStyle = `rgba(0,30,20,${boardAlpha})`;
+          ctx.fill();
+
+          // grid on PCB
+          ctx.strokeStyle = `rgba(0,242,255,${0.04 + ease * 0.06})`;
+          ctx.lineWidth = 0.5;
+          for (let x = pcbX; x < pcbX + pcbW; x += 20) {
+            ctx.beginPath();
+            ctx.moveTo(x, pcbY);
+            ctx.lineTo(x, pcbY + pcbH);
+            ctx.stroke();
+          }
+          for (let y = pcbY; y < pcbY + pcbH; y += 20) {
+            ctx.beginPath();
+            ctx.moveTo(pcbX, y);
+            ctx.lineTo(pcbX + pcbW, y);
+            ctx.stroke();
+          }
+
+          // traces
+          traces.forEach((tr, i) => {
+            const td = Math.max(0, Math.min(1, (ease - i * 0.12) * 3));
+            if (td <= 0) return;
+            ctx.strokeStyle = `rgba(${tr.color},${0.3 + td * 0.5})`;
+            ctx.lineWidth = 1.2;
+            ctx.setLineDash([4, 3]);
+            ctx.lineDashOffset = -espT * 12;
+            ctx.beginPath();
+            ctx.moveTo(tr.x1, tr.y1);
+            const cx = (tr.x1 + tr.x2) / 2;
+            ctx.bezierCurveTo(cx, tr.y1, cx, tr.y2, tr.x2, tr.y2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            if (td > 0.7) {
+              ctx.fillStyle = `rgba(${tr.color},0.5)`;
+              ctx.font = "8px JetBrains Mono";
+              ctx.fillText(
+                tr.label,
+                (tr.x1 + tr.x2) / 2 - 14,
+                (tr.y1 + tr.y2) / 2 - 5,
+              );
+            }
+          });
+
+          // pins
+          pins.forEach((pin) => {
+            const pd = Math.max(0, Math.min(1, (ease - pin.delay * 0.5) * 4));
+            if (pd <= 0) return;
+            ctx.fillStyle = `rgba(0,242,255,${0.4 * pd})`;
+            const pw = pin.side === "L" ? -8 * pd : 8 * pd;
+            ctx.fillRect(
+              pin.x + (pin.side === "L" ? pw : 0),
+              pin.y - 2,
+              Math.abs(pw),
+              4,
+            );
+          });
+
+          // components
+          components.forEach((comp) => {
+            const cd = Math.max(0, Math.min(1, (ease - comp.delay * 0.8) * 3));
+            if (cd <= 0) return;
+            const cx =
+              comp.x +
+              comp.w / 2 +
+              (1 - cd) * 30 * (Math.random() > 0.5 ? 1 : -1) * 0;
+            const cy = comp.y - (1 - cd) * 20;
+            ctx.save();
+            ctx.globalAlpha = cd;
+            ctx.strokeStyle = `rgba(${comp.color},${0.6 + cd * 0.3})`;
+            ctx.lineWidth = 1.2;
+            ctx.fillStyle = `rgba(${comp.color},0.06)`;
+            ctx.beginPath();
+            ctx.roundRect(comp.x, comp.y, comp.w, comp.h, 3);
+            ctx.fill();
+            ctx.stroke();
+
+            // pulse on hover
+            if (hovered && ease > 0.8) {
+              const pulse = (Math.sin(espT * 3 + comp.delay * 5) + 1) / 2;
+              ctx.strokeStyle = `rgba(${comp.color},${0.15 + pulse * 0.2})`;
+              ctx.lineWidth = 1;
+              ctx.beginPath();
+              ctx.roundRect(comp.x - 3, comp.y - 3, comp.w + 6, comp.h + 6, 5);
+              ctx.stroke();
+            }
+
+            ctx.fillStyle = `rgba(${comp.color},0.8)`;
+            ctx.font = `${Math.max(7, 8 * cd)}px JetBrains Mono`;
+            ctx.textAlign = "center";
+            ctx.fillText(
+              comp.label,
+              comp.x + comp.w / 2,
+              comp.y + comp.h / 2 + 3,
+            );
+            ctx.restore();
+          });
+
+          // connection lines from PCB to labels (visible on full assemble)
+          if (ease > 0.85) {
+            const alpha = (ease - 0.85) / 0.15;
+            const labels = [
+              {
+                x: pcbX + pcbW / 2,
+                y: pcbY - 10,
+                text: "SOFTWARE DASHBOARD",
+                col: "0,242,255",
+              },
+              {
+                x: pcbX - 20,
+                y: pcbY + pcbH / 2,
+                text: "RLC INPUT",
+                col: "255,0,85",
+              },
+              {
+                x: pcbX + pcbW + 20,
+                y: pcbY + pcbH / 2,
+                text: "NEURAL OUTPUT",
+                col: "180,74,255",
+              },
+              {
+                x: pcbX + pcbW / 2,
+                y: pcbY + pcbH + 10,
+                text: "USB / UART DEBUG",
+                col: "100,200,255",
+              },
+            ];
+            labels.forEach((lb) => {
+              ctx.globalAlpha = alpha;
+              ctx.fillStyle = `rgba(${lb.col},0.7)`;
+              ctx.font = "9px JetBrains Mono";
+              ctx.textAlign = "center";
+              ctx.fillText(lb.text, lb.x, lb.y);
+              ctx.globalAlpha = 1;
+            });
+          }
+
+          // idle ghost if not hovered
+          if (!hovered && assembleProgress < 0.01) {
+            ctx.globalAlpha = 0.25 + Math.sin(espT) * 0.05;
+            ctx.strokeStyle = "rgba(0,242,255,0.4)";
+            ctx.lineWidth = 1;
+            ctx.setLineDash([3, 5]);
+            ctx.beginPath();
+            ctx.roundRect(pcbX, pcbY, pcbW, pcbH, 8);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.globalAlpha = 0.18;
+            ctx.fillStyle = "rgba(0,242,255,1)";
+            ctx.font = "12px JetBrains Mono";
+            ctx.textAlign = "center";
+            ctx.fillText("[ HOVER TO ASSEMBLE ]", W / 2, H / 2 + 4);
+            ctx.globalAlpha = 1;
+          }
+
+          /* ═══════════════════════════════════════
+   HERO SCROLL BUTTON
+═══════════════════════════════════════ */
+          const scrollToChaosBtn = document.getElementById("scroll-to-chaos");
+          const chaosSection = document.getElementById("chaos");
+
+          if (scrollToChaosBtn && chaosSection) {
+            scrollToChaosBtn.addEventListener("click", () => {
+              chaosSection.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+              });
+            });
+          }
+
+          requestAnimationFrame(drawESP);
+        }
+        drawESP();
+      })();
+    </script>
+
+    <footer id="footer">
+      <div class="footer-grid">
+        <div class="footer-brand glass">
+          <p class="footer-label">// End Transmission</p>
+          <h3>Q-NOISE</h3>
+          <p class="footer-copy">
+            Quantum Hardware Noise Analysis Platform interface for simulating
+            decoherence, mitigation, and hardware-linked intelligence.
+          </p>
+        </div>
+
+        <div class="footer-block glass">
+          <p class="footer-label">// Navigation</p>
+          <a href="#hero" data-hover>The Signal</a>
+          <a href="#chaos" data-hover>The Chaos</a>
+          <a href="#shield" data-hover>The Shield</a>
+          <a href="#hil" data-hover>Hardware In The Loop</a>
+        </div>
+
+        <div class="footer-block glass">
+          <p class="footer-label">// Team</p>
+          <a
+            href="https://www.linkedin.com/in/adityaarulmanalan/"
+            class="footer-stat"
+            data-hover
+            >Aditya Arul Manalan</a
+          >
+          <a href="#" class="footer-stat" data-hover>Naman Kaushik</a>
+          <a href="#" class="footer-stat" data-hover>Tulsi</a>
+          <a href="#" class="footer-stat" data-hover>Anvi Sharma</a>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>Q-NOISE // QUANTUM Noise PROCESSING</span>
+        <span
+          >© 2026 // BUILT FOR QTHack04 @ SRM Institute Of Science And
+          Technology</span
+        >
+      </div>
+    </footer>
+  </body>
+</html>
