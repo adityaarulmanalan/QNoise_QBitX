@@ -8,6 +8,11 @@ Designed for developers, researchers, and students, Q-Noise provides a **real-ti
 
 ---
 
+## 🌐 Live Demo
+https://your-link.vercel.app
+
+---
+
 ## 🚀 Overview
 
 Quantum systems are extremely sensitive to disturbances like:
