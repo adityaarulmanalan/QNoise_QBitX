@@ -51,6 +51,23 @@ QBitX bridges theory and practice by letting users **see, tweak, and fix noise i
 
 ---
 
+## 🧠 Solution (Expanded)
+
+QBitX provides a layered simulation and mitigation pipeline that models how quantum control signals degrade and how different techniques can restore them.
+
+Instead of treating noise as an abstract concept, QBitX represents it as a real-time signal transformation problem, allowing users to:
+	-	Inject controlled noise into a clean signal
+	-	Observe how it affects signal integrity and system metrics
+	-	Apply multiple mitigation strategies and compare their effectiveness
+
+The system is built around a continuous signal loop:
+
+Clean Signal → Noise Injection → Distortion Analysis → Mitigation → Evaluation
+
+This loop runs in real time, giving immediate feedback on how each parameter affects the system.
+
+---
+
 ## 🌐 Live Experience (Interactive Website)
 
 The project includes a cinematic interactive website that explains quantum noise concepts visually:
@@ -128,6 +145,47 @@ Leads to incorrect energy levels
 5. Compare before vs after  
 
 ---
+
+## 🧩 Mitigation Controls (Detailed)
+
+QBitX includes multiple mitigation strategies that represent both classical signal processing and adaptive AI-based correction techniques.
+
+---
+
+## ⚙️ 1. RLC Filter (Classical Mitigation)
+
+A simulated low-pass RLC filter is applied to reduce high-frequency noise components.
+
+What it does:
+	•	Smooths out rapid fluctuations in the signal
+	•	Reduces thermal and electromagnetic noise
+	•	Stabilizes signal amplitude
+
+Trade-offs:
+	•	Introduces phase lag
+	•	Cannot adapt to changing noise patterns
+	•	May distort the original signal over time
+
+👉 In your system, this is implemented using a low-pass filter approximation
+(where signal values are smoothed over time).  ￼
+
+⸻
+
+## 🧠 2. Neural Predictor (AI-Based Mitigation)
+
+The Neural Predictor is an adaptive noise cancellation system that learns from recent signal behavior.
+
+How it works:
+	•	Tracks noise history from previous signal frames
+	•	Calculates statistical properties like mean, variance, and deviation
+	•	Predicts the noise component in the incoming signal
+	•	Subtracts or reduces that noise dynamically
+
+👉 This is based on your actual logic:
+	•	moving average of noise
+	•	adaptive cancellation factor
+	•	real-time correction loop  ￼
+
 
 ## 🖥️ How to Run
 
