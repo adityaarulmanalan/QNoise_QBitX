@@ -152,7 +152,7 @@ QBitX includes multiple mitigation strategies that represent both classical sign
 
 --
 
-## ⚙️ 1. RLC Filter (Classical Mitigation)
+### ⚙️ 1. RLC Filter (Classical Mitigation)
 
 A simulated low-pass RLC filter is applied to reduce high-frequency noise components.
 
@@ -169,9 +169,7 @@ Trade-offs:
 👉 In your system, this is implemented using a low-pass filter approximation
 (where signal values are smoothed over time).  ￼
 
---
-
-## 🧠 2. Neural Predictor (AI-Based Mitigation)
+### 🧠 2. Neural Predictor (AI-Based Mitigation)
 
 The Neural Predictor is an adaptive noise cancellation system that learns from recent signal behavior.
 
