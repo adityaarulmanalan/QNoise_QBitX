@@ -150,7 +150,7 @@ Leads to incorrect energy levels
 
 QBitX includes multiple mitigation strategies that represent both classical signal processing and adaptive AI-based correction techniques.
 
----
+--
 
 ## ⚙️ 1. RLC Filter (Classical Mitigation)
 
@@ -169,7 +169,7 @@ Trade-offs:
 👉 In your system, this is implemented using a low-pass filter approximation
 (where signal values are smoothed over time).  ￼
 
-⸻
+--
 
 ## 🧠 2. Neural Predictor (AI-Based Mitigation)
 
@@ -186,6 +186,7 @@ How it works:
 	•	adaptive cancellation factor
 	•	real-time correction loop  ￼
 
+---
 
 ## 🖥️ How to Run
 
